@@ -1,0 +1,134 @@
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl font-semibold text-slate-900">Seguimiento de leads</h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Indicadores y gestion de prospectos inmobiliarios.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span *ngIf="auth.user$ | async as user" class="text-sm text-slate-600">
+        {{ user.name }}
+      </span>
+
+      <button
+        *ngIf="auth.user$ | async"
+        type="button"
+        class="btn-secondary"
+        (click)="onLogout()"
+      >
+        <fa-icon [icon]="icons.logout" aria-hidden="true" />
+        Salir
+      </button>
+
+      <button type="button" class="btn-primary" (click)="onCreateLead()">
+        <fa-icon [icon]="icons.add" aria-hidden="true" />
+        Nuevo lead
+      </button>
+    </div>
+  </header>
+
+  <p
+    *ngIf="actionError()"
+    class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+    role="alert"
+  >
+    {{ actionError() }}
+  </p>
+
+  <!-- Indicadores -->
+  <section aria-label="Indicadores" class="mb-6">
+    <ng-container *ngIf="summary$ | async as summary">
+      <app-state-message
+        *ngIf="summary.status === 'error'"
+        variant="error"
+        title="No se pudieron cargar los indicadores"
+        [description]="summary.message"
+        [retryable]="true"
+        (retry)="onRetry()"
+      />
+
+      <div *ngIf="summary.status !== 'error'" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <app-kpi-card
+          label="Total de leads"
+          [icon]="icons.total"
+          [value]="summary.status === 'success' ? summary.data.totalLeads : null"
+          [loading]="summary.status === 'loading'"
+        />
+        <app-kpi-card
+          label="Presupuesto promedio"
+          [icon]="icons.budget"
+          format="currency"
+          [value]="summary.status === 'success' ? summary.data.averageBudget : null"
+          [loading]="summary.status === 'loading'"
+        />
+        <app-kpi-card
+          label="Tasa de conversion"
+          [icon]="icons.conversion"
+          format="percent"
+          [value]="summary.status === 'success' ? summary.data.conversionRate : null"
+          [loading]="summary.status === 'loading'"
+        />
+        <app-kpi-card
+          label="Leads reservados"
+          [icon]="icons.reserved"
+          [value]="summary.status === 'success' ? summary.data.reservedLeads : null"
+          [loading]="summary.status === 'loading'"
+        />
+      </div>
+    </ng-container>
+  </section>
+
+  <!-- Filtros -->
+  <div class="mb-4">
+    <app-lead-filters
+      [filters]="currentFilters()"
+      [projects]="(projects$ | async) ?? []"
+      (filtersChange)="onFiltersChange($event)"
+      (clear)="onClearFilters()"
+    />
+  </div>
+
+  <!-- Listado -->
+  <section class="card overflow-hidden" aria-label="Listado de leads">
+    <ng-container *ngIf="leads$ | async as leads">
+      <!-- Estado: cargando -->
+      <div *ngIf="leads.status === 'loading'" class="space-y-3 p-4" aria-busy="true">
+        <span class="sr-only">Cargando leads</span>
+        <div *ngFor="let row of [1, 2, 3, 4, 5]" class="h-10 animate-pulse rounded bg-slate-100"></div>
+      </div>
+
+      <!-- Estado: error -->
+      <app-state-message
+        *ngIf="leads.status === 'error'"
+        variant="error"
+        title="No se pudieron cargar los leads"
+        [description]="leads.message"
+        [retryable]="true"
+        (retry)="onRetry()"
+      />
+
+      <!-- Estado: sin resultados -->
+      <app-state-message
+        *ngIf="leads.status === 'success' && leads.data.data.length === 0"
+        title="No hay leads que coincidan"
+        description="Pruebe ajustando los filtros o cree un lead nuevo."
+      />
+
+      <!-- Estado: exito -->
+      <ng-container *ngIf="leads.status === 'success' && leads.data.data.length > 0">
+        <app-lead-table
+          [leads]="leads.data.data"
+          [sortBy]="currentQuery().sortBy"
+          [sortOrder]="currentQuery().sortOrder"
+          [updatingId]="updatingId()"
+          (sort)="onSort($event)"
+          (statusChange)="onStatusChange($event)"
+        />
+
+        <app-lead-paginator [meta]="leads.data.meta" (pageChange)="onPageChange($event)" />
+      </ng-container>
+    </ng-container>
+  </section>
+</div>
