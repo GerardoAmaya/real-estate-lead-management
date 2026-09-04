@@ -12,7 +12,11 @@ const LEAD_VALIDATOR = {
       phone: { bsonType: 'string', maxLength: 30 },
       source: { enum: ['Facebook', 'Instagram', 'Website', 'Referido'] },
       status: { enum: ['Nuevo', 'Contactado', 'Calificado', 'Reservado', 'Descartado'] },
-      budget: { bsonType: ['int', 'long', 'double', 'decimal'], minimum: 0, exclusiveMinimum: true },
+      budget: {
+        bsonType: ['int', 'long', 'double', 'decimal'],
+        minimum: 0,
+        exclusiveMinimum: true,
+      },
       project: { bsonType: 'string', minLength: 2, maxLength: 120 },
       createdAt: { bsonType: 'date' },
       updatedAt: { bsonType: 'date' },

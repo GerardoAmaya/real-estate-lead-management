@@ -48,7 +48,11 @@ interface LeadFormControls {
           <label class="field-label" for="lead-name">Nombre</label>
           <input id="lead-name" class="field-input" formControlName="name" autocomplete="off" />
           <p class="field-error" *ngIf="showError('name')">
-            {{ form.controls.name.hasError('required') ? 'El nombre es obligatorio.' : 'Debe tener al menos 2 caracteres.' }}
+            {{
+              form.controls.name.hasError('required')
+                ? 'El nombre es obligatorio.'
+                : 'Debe tener al menos 2 caracteres.'
+            }}
           </p>
         </div>
 
@@ -56,7 +60,11 @@ interface LeadFormControls {
           <label class="field-label" for="lead-email">Correo</label>
           <input id="lead-email" class="field-input" formControlName="email" autocomplete="off" />
           <p class="field-error" *ngIf="showError('email')">
-            {{ form.controls.email.hasError('required') ? 'El correo es obligatorio.' : 'El correo no tiene un formato valido.' }}
+            {{
+              form.controls.email.hasError('required')
+                ? 'El correo es obligatorio.'
+                : 'El correo no tiene un formato valido.'
+            }}
           </p>
         </div>
 
@@ -76,7 +84,11 @@ interface LeadFormControls {
               min="1"
             />
             <p class="field-error" *ngIf="showError('budget')">
-              {{ form.controls.budget.hasError('required') ? 'El presupuesto es obligatorio.' : 'Debe ser mayor que cero.' }}
+              {{
+                form.controls.budget.hasError('required')
+                  ? 'El presupuesto es obligatorio.'
+                  : 'Debe ser mayor que cero.'
+              }}
             </p>
           </div>
         </div>
@@ -99,7 +111,12 @@ interface LeadFormControls {
 
         <div>
           <label class="field-label" for="lead-project">Proyecto</label>
-          <input id="lead-project" class="field-input" formControlName="project" autocomplete="off" />
+          <input
+            id="lead-project"
+            class="field-input"
+            formControlName="project"
+            autocomplete="off"
+          />
           <p class="field-error" *ngIf="showError('project')">El proyecto es obligatorio.</p>
         </div>
 

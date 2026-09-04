@@ -2,11 +2,7 @@ import type { QueryFilter, SortOrder } from 'mongoose';
 import { AppError } from '../../shared/errors/AppError';
 import type { PaginatedResponse } from '../../shared/types/api';
 import { LeadModel, type Lead } from './lead.model';
-import type {
-  CreateLeadInput,
-  ListLeadsQuery,
-  UpdateLeadStatusInput,
-} from './lead.schema';
+import type { CreateLeadInput, ListLeadsQuery, UpdateLeadStatusInput } from './lead.schema';
 
 // Solo se filtra por campos declarados: nada del query llega crudo a Mongo.
 function buildFilter(query: ListLeadsQuery): QueryFilter<Lead> {

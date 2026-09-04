@@ -139,3 +139,10 @@ jobs:
       # Comprueba que la imagen de produccion compila; no la publica.
       - name: Construir la imagen del backend
         run: docker build -f backend/Dockerfile --target production -t rel-api:ci .
+
+      - name: Construir la imagen del frontend
+        run: docker build -f frontend/Dockerfile --target production -t rel-web:ci ./frontend
+
+      # El contenedor de migraciones necesita las devDependencies del backend.
+      - name: Construir la imagen de migraciones
+        run: docker build -f backend/Dockerfile --target migrator -t rel-migrate:ci .

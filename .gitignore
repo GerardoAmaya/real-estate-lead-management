@@ -3,7 +3,7 @@ node_modules/
 .pnp/
 .pnp.js
 
-# Variables de entorno — nunca versionar valores reales
+# Variables de entorno: nunca versionar valores reales
 .env
 .env.local
 .env.*.local

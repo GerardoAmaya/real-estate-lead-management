@@ -35,14 +35,16 @@ describe('especificacion OpenAPI', () => {
 
     expect(lead.status.enum).toEqual([...LEAD_STATUSES]);
     expect(lead.source.enum).toEqual([...LEAD_SOURCES]);
-    expect(openApiDocument.components.schemas.ApiError.properties.error.properties.code.enum).toEqual(
-      Object.values(ErrorCode),
-    );
+    expect(
+      openApiDocument.components.schemas.ApiError.properties.error.properties.code.enum,
+    ).toEqual(Object.values(ErrorCode));
   });
 
   it('documenta el tope real de paginacion', () => {
     const { paths } = openApiDocument as unknown as {
-      paths: { '/api/leads': { get: { parameters: { name: string; schema: { maximum?: number } }[] } } };
+      paths: {
+        '/api/leads': { get: { parameters: { name: string; schema: { maximum?: number } }[] } };
+      };
     };
     const limit = paths['/api/leads'].get.parameters.find((p) => p.name === 'limit');
 
@@ -63,7 +65,18 @@ describe('especificacion OpenAPI', () => {
 
   it('define un ejemplo propio por respuesta de error, sin reutilizar uno generico', () => {
     const { paths } = openApiDocument as unknown as {
-      paths: Record<string, Record<string, { responses: Record<string, { content?: Record<string, { example?: { error?: { code: string } } }> }> }>>;
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            responses: Record<
+              string,
+              { content?: Record<string, { example?: { error?: { code: string } } }> }
+            >;
+          }
+        >
+      >;
     };
     const codeOf = (path: string, method: string, status: string): string | undefined =>
       paths[path][method].responses[status].content?.['application/json'].example?.error?.code;

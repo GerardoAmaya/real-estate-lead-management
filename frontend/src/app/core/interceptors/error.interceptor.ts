@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import type { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import type { ApiErrorResponse } from '../models/api-error.model';
@@ -25,11 +26,15 @@ export function toMessage(error: HttpErrorResponse): string {
 
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthService);
+  const router = inject(Router);
 
   return next(request).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Token vencido o invalido: la sesion local ya no sirve.
-      if (error.status === 401 && auth.isAuthenticated) auth.logout();
+      // Token vencido o invalido: se cierra la sesion local y se vuelve al acceso.
+      if (error.status === 401 && auth.isAuthenticated) {
+        auth.logout();
+        void router.navigate(['/login']);
+      }
 
       return throwError(() => new Error(toMessage(error)));
     }),

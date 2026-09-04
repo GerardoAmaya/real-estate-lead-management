@@ -2,22 +2,19 @@
   <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-xl font-semibold text-slate-900">Seguimiento de leads</h1>
-      <p class="mt-1 text-sm text-slate-500">
-        Indicadores y gestion de prospectos inmobiliarios.
-      </p>
+      <p class="mt-1 text-sm text-slate-500">Indicadores y gestion de prospectos inmobiliarios.</p>
     </div>
 
     <div class="flex items-center gap-3">
-      <span *ngIf="auth.user$ | async as user" class="text-sm text-slate-600">
+      <span
+        *ngIf="auth.user$ | async as user"
+        class="inline-flex items-center gap-2 text-sm text-slate-600"
+      >
+        <fa-icon [icon]="icons.user" class="text-base text-slate-400" aria-hidden="true" />
         {{ user.name }}
       </span>
 
-      <button
-        *ngIf="auth.user$ | async"
-        type="button"
-        class="btn-secondary"
-        (click)="onLogout()"
-      >
+      <button *ngIf="auth.user$ | async" type="button" class="btn-secondary" (click)="onLogout()">
         <fa-icon [icon]="icons.logout" aria-hidden="true" />
         Salir
       </button>
@@ -96,7 +93,10 @@
       <!-- Estado: cargando -->
       <div *ngIf="leads.status === 'loading'" class="space-y-3 p-4" aria-busy="true">
         <span class="sr-only">Cargando leads</span>
-        <div *ngFor="let row of [1, 2, 3, 4, 5]" class="h-10 animate-pulse rounded bg-slate-100"></div>
+        <div
+          *ngFor="let row of [1, 2, 3, 4, 5]"
+          class="h-10 animate-pulse rounded bg-slate-100"
+        ></div>
       </div>
 
       <!-- Estado: error -->
