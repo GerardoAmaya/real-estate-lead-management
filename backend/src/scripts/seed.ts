@@ -5,6 +5,9 @@ import { env } from '../config/env';
 import { connectDatabase, disconnectDatabase } from '../config/database';
 import { LeadModel } from '../modules/leads/lead.model';
 import { createLeadSchema } from '../modules/leads/lead.schema';
+import { UserModel } from '../modules/auth/user.model';
+import { USER_ROLES } from '../modules/auth/user.constants';
+import { hashPassword } from '../modules/auth/auth.service';
 
 // Los datos viven en seed/data en la raiz del repositorio; en Docker la ruta
 // se sobrescribe con SEED_DATA_DIR porque el contexto de build es distinto.
@@ -17,6 +20,15 @@ const seedLeadSchema = createLeadSchema.extend({
 });
 
 type SeedLead = z.infer<typeof seedLeadSchema>;
+
+// La contrasena no vive en el JSON: se toma del entorno y se guarda hasheada.
+const seedUserSchema = z
+  .object({
+    name: z.string().trim().min(2).max(120),
+    email: z.email().max(160),
+    role: z.enum(USER_ROLES),
+  })
+  .strict();
 
 function readJson(fileName: string): unknown {
   return JSON.parse(readFileSync(path.join(DATA_DIR, fileName), 'utf8')) as unknown;
@@ -49,6 +61,25 @@ async function seedLeads(fresh: boolean): Promise<void> {
 
   await LeadModel.insertMany(documents, { timestamps: false });
   log(`Insertados ${documents.length} leads.`);
+}
+
+async function seedUsers(fresh: boolean): Promise<void> {
+  const parsed = z.array(seedUserSchema).parse(readJson('users.json'));
+
+  if (fresh) {
+    const { deletedCount } = await UserModel.deleteMany({});
+    log(`Eliminados ${deletedCount} usuarios previos.`);
+  }
+
+  for (const user of parsed) {
+    const exists = await UserModel.exists({ email: user.email });
+    if (exists) {
+      log(`El usuario ${user.email} ya existe, se omite.`);
+      continue;
+    }
+    await UserModel.create({ ...user, password: await hashPassword(env.SEED_ADMIN_PASSWORD) });
+    log(`Creado usuario ${user.email} con rol ${user.role}.`);
+  }
 }
 
 interface SeedSummary {
@@ -102,6 +133,7 @@ async function main(): Promise<void> {
   log(`Conectado a ${env.MONGODB_DB_NAME}`);
 
   await seedLeads(fresh);
+  await seedUsers(fresh);
   await verify();
 
   await disconnectDatabase();
