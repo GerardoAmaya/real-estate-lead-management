@@ -59,7 +59,7 @@ export async function updateLeadStatus(id: string, input: UpdateLeadStatusInput)
   const updated = await LeadModel.findByIdAndUpdate(
     id,
     { $set: { status: input.status } },
-    { new: true, runValidators: true },
+    { returnDocument: 'after', runValidators: true },
   )
     .lean<Lead>()
     .exec();
