@@ -57,17 +57,45 @@ export function createApp(): Express {
     }),
   );
 
-  app.use(helmet());
+  // Swagger UI necesita estilos e imagenes en linea; el resto de la politica
+  // por defecto de Helmet se mantiene intacta.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          'default-src': ["'self'"],
+          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': ["'self'", 'data:', 'https:'],
+          'script-src': ["'self'"],
+        },
+      },
+    }),
+  );
   app.use(compression());
 
+  // El origen propio siempre se permite: Swagger UI se sirve desde la misma
+  // API, y comparar contra el host de la peticion funciona igual en local,
+  // en Docker y detras de un dominio, sin listar puertos a mano.
+  function isSameOrigin(origin: string, host: string | undefined): boolean {
+    if (!host) return false;
+    try {
+      return new URL(origin).host === host;
+    } catch {
+      return false;
+    }
+  }
+
   app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Sin origin: herramientas como curl o Postman.
-        if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
-        callback(AppError.forbidden(`Origen no permitido por CORS: ${origin}`));
-      },
-      credentials: true,
+    cors((req, callback) => {
+      const origin = req.headers.origin;
+
+      // Sin origin: herramientas como curl o Postman.
+      if (!origin || env.corsOrigins.includes(origin) || isSameOrigin(origin, req.headers.host)) {
+        callback(null, { origin: true, credentials: true });
+        return;
+      }
+
+      callback(AppError.forbidden(`Origen no permitido por CORS: ${origin}`));
     }),
   );
 
@@ -84,7 +112,7 @@ export function createApp(): Express {
       limit: env.RATE_LIMIT_MAX,
       standardHeaders: 'draft-7',
       legacyHeaders: false,
-      skip: (req) => req.path === '/api/health',
+      skip: (req) => req.path === '/api/health' || req.path.startsWith('/api/docs'),
       handler: (_req, _res, next) => {
         next(
           new AppError(
