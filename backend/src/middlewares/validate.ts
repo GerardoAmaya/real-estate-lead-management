@@ -23,11 +23,7 @@ export function validate(schemas: ValidationSchemas): RequestHandler {
   };
 }
 
-// Accesores tipados para no repetir casts en cada controlador.
+// Accesor tipado para no repetir casts en cada controlador.
 export function validatedQuery<T>(req: { validated?: { query?: unknown } }): T {
   return req.validated?.query as T;
-}
-
-export function validatedParams<T>(req: { validated?: { params?: unknown } }): T {
-  return req.validated?.params as T;
 }

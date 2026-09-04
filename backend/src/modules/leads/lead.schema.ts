@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { z } from 'zod';
 import {
   DEFAULT_PAGE_SIZE,
@@ -27,12 +26,6 @@ export const updateLeadStatusSchema = z
   })
   .strict();
 
-export const leadIdParamSchema = z.object({
-  id: z.string().refine((value) => Types.ObjectId.isValid(value), {
-    message: 'El identificador no es un ObjectId valido',
-  }),
-});
-
 export const listLeadsQuerySchema = z
   .object({
     status: z.enum(LEAD_STATUSES).optional(),
@@ -48,4 +41,3 @@ export const listLeadsQuerySchema = z
 export type CreateLeadInput = z.infer<typeof createLeadSchema>;
 export type UpdateLeadStatusInput = z.infer<typeof updateLeadStatusSchema>;
 export type ListLeadsQuery = z.infer<typeof listLeadsQuerySchema>;
-export type LeadIdParam = z.infer<typeof leadIdParamSchema>;
