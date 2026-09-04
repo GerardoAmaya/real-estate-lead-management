@@ -43,3 +43,6 @@ Thumbs.db
 
 # Docker
 .docker-data/
+
+# Playwright: sesion reutilizada por las pruebas E2E
+e2e/.auth/*.json

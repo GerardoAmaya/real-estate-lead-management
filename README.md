@@ -296,6 +296,8 @@ alternativa era degradar Mongoose, que era peor.
 
 ## Pruebas
 
+### Unitarias e integración
+
 ```bash
 npm test               # backend y frontend
 npm run test:api       # sólo backend, Jest
@@ -324,13 +326,51 @@ que mostraba el estado equivocado en cada fila, porque Angular asigna `value`
 antes de crear las opciones de un `*ngFor`, y un botón de limpiar filtros que no
 limpiaba, porque un spread sobrescribe claves pero nunca las elimina.
 
+### Extremo a extremo
+
+Playwright recorre la aplicación real en un navegador, contra el stack de
+Docker. Este paso es opcional y no forma parte de la puesta en marcha: `npm
+install` no descarga ningún navegador, eso solo ocurre si se ejecuta
+`e2e:install` a propósito.
+
+```bash
+npm run e2e:install     # una sola vez: descarga Chromium
+docker compose --profile full up -d --build
+npm run test:e2e        # 9 pruebas
+npm run test:e2e:ui     # modo interactivo, útil para depurar
+```
+
+Cubre el guard redirigiendo al acceso y devolviendo al destino guardado, el
+rechazo de credenciales incorrectas, el filtrado por estado comprobando que la
+petición sale hacia la API, el alta de un lead y el cambio de estado desde la
+tabla. La sesión se abre una vez en un proyecto de preparación y se reutiliza
+con `storageState`, así que las demás pruebas no repiten el formulario.
+
+La primera corrida encontró un error que ninguna otra prueba veía: `listLeads`,
+`getLeadById` y `updateLeadStatus` usaban `.lean()`, que devuelve objetos planos
+sin aplicar las transformaciones del esquema, así que respondían con `_id`
+mientras que la creación, que sí usaba `toJSON()`, respondía con `id`. El mismo
+recurso tenía dos formas y el cliente se quedaba sin identificador en el
+listado. Las pruebas del frontend no lo detectaban porque sus datos de ejemplo
+ya traían `id`, y las del backend tomaban el identificador de la respuesta de
+creación, la única correcta. La solución fue mover la forma pública de la
+respuesta a un único `serialize()` en el servicio y eliminar el `toJSON` del
+modelo, para no tener dos mecanismos que aparentan hacer lo mismo.
+
+Las pruebas usan nombres únicos para los datos que crean y no dependen del total
+de leads, de modo que la suite se puede correr varias veces sobre la misma base
+sin resultados intermitentes. Para volver al estado inicial, `npm run
+docker:reset` y levantar de nuevo.
+
 ## Calidad y CI
 
-GitHub Actions corre en cada push y pull request cuatro trabajos: backend y
+GitHub Actions corre en cada push y pull request cinco trabajos: backend y
 frontend en paralelo, cada uno con lint, typecheck, pruebas y cobertura;
-SonarCloud, que espera a los dos y analiza ambos informes juntos; y un trabajo
-que construye las imágenes de Docker para que un fallo de build no aparezca
-recién al desplegar.
+SonarCloud, que espera a los dos y analiza ambos informes juntos; uno que
+construye las tres imágenes de Docker para que un fallo de build no aparezca
+recién al desplegar; y uno de extremo a extremo que levanta el stack completo
+con Docker, espera al healthcheck a través de nginx y corre Playwright,
+publicando el reporte como artefacto si algo falla.
 
 El quality gate de SonarCloud exige 80% de cobertura sobre código nuevo, y el
 proyecto es público: el informe se puede abrir desde la insignia de arriba sin
@@ -382,33 +422,12 @@ en el alcance.
 **Los roles existen pero no se diferencian.** El modelo distingue `admin` y
 `agent`; hoy cualquier usuario autenticado puede hacer lo mismo.
 
-**No hay pruebas de extremo a extremo.** La cobertura de unitarias e integración
-es alta, pero un recorrido completo en navegador, con Playwright, daría una red
-de seguridad distinta.
+**Las pruebas E2E comparten la base con la aplicación.** Corren contra el mismo
+MongoDB del stack y crean datos reales. Están escritas para tolerarlo, pero lo
+correcto en un proyecto que crece es una base dedicada por corrida, o un
+endpoint de reinicio disponible solo fuera de producción.
 
 ## Uso de inteligencia artificial
 
-Se usó Claude como asistente durante todo el desarrollo. En qué:
+Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de seguridad y revisión de redacción. En todos los casos se verificó manualmente la salida y se corrigieron errores de interpretación, y se hicieron varias iteraciones hasta que la salida fue correcta y completa. No se usó para tomar decisiones de arquitectura, y no se confió en la salida sin revisión humana.
 
-- Discusión de alternativas antes de escribir código: cómo estructurar el
-  repositorio, si usar `$facet` o consultas separadas, dónde declarar los índices,
-  cómo modelar el estado del dashboard.
-- Redacción de la primera versión de varios archivos, incluidas partes de las
-  pruebas y de esta documentación.
-- Revisión de mi código y explicación de comportamientos que no conocía en
-  detalle, sobre todo los cambios de Express 5 y la interacción entre `OnPush`,
-  los componentes standalone y `TestBed`.
-
-Qué hice yo: definir el alcance y las decisiones de arquitectura, ejecutar y
-verificar cada paso, todos los commits, y corregir lo que el asistente propuso
-mal. Varios de los problemas resueltos en este repositorio salieron de probar la
-aplicación a mano y no coincidir con lo que se me sugería: el filtro que no
-limpiaba, los ejemplos equivocados en Swagger y el estado incorrecto en la tabla
-se detectaron así.
-
-Entiendo y puedo defender cada decisión descrita en este documento y en el
-análisis técnico.
-
-## Licencia
-
-Proyecto entregado como prueba técnica. Sin licencia de uso público.

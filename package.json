@@ -29,12 +29,16 @@
     "test:api": "npm --prefix backend test",
     "test:web": "npm --prefix frontend test",
     "test:cov": "npm --prefix backend run test:cov && npm --prefix frontend run test:cov",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "e2e:install": "playwright install --with-deps chromium",
     "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
     "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,scss}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md,html,scss}\""
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "concurrently": "^8.2.2",
     "prettier": "^3.3.3"
   }

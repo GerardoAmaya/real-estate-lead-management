@@ -102,6 +102,36 @@ describe('GET /api/leads/:id', () => {
     expect(response.body).toMatchObject({ email: VALID_LEAD.email });
   });
 
+  // lean() se salta las transformaciones del esquema: sin esta comprobacion
+  // el listado devolvia _id y el cliente se quedaba sin identificador.
+  it('expone id y nunca _id, igual en las cuatro respuestas', async () => {
+    const token = await authToken();
+
+    const creado = (
+      await api()
+        .post('/api/leads')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...VALID_LEAD })
+    ).body as Record<string, unknown>;
+
+    const detalle = (await api().get(`/api/leads/${String(creado.id)}`)).body as Record<
+      string,
+      unknown
+    >;
+    const listado = (await api().get('/api/leads')).body as ListBody;
+    const actualizado = (
+      await api()
+        .patch(`/api/leads/${String(creado.id)}/status`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ status: 'Contactado' })
+    ).body as Record<string, unknown>;
+
+    for (const cuerpo of [creado, detalle, actualizado, ...listado.data]) {
+      expect(typeof (cuerpo as { id?: unknown }).id).toBe('string');
+      expect(cuerpo).not.toHaveProperty('_id');
+    }
+  });
+
   it('distingue un identificador mal formado con 400', async () => {
     const response = await api().get('/api/leads/no-es-un-object-id');
 

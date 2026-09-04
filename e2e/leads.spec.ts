@@ -1,0 +1,92 @@
+import { test, expect } from '@playwright/test';
+
+const RESERVADOS = ['Andrea Martínez', 'Daniela Cruz'];
+const INDICADORES = [
+  'Total de leads',
+  'Presupuesto promedio',
+  'Tasa de conversion',
+  'Leads reservados',
+];
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('/leads');
+  await expect(page.getByRole('heading', { name: 'Seguimiento de leads' })).toBeVisible();
+});
+
+test('muestra los cuatro indicadores del dashboard', async ({ page }) => {
+  const indicadores = page.getByRole('region', { name: 'Indicadores' });
+
+  for (const etiqueta of INDICADORES) {
+    await expect(indicadores.getByText(etiqueta)).toBeVisible();
+  }
+});
+
+test('filtrar por estado consulta al backend y acota la tabla', async ({ page }) => {
+  const filtros = page.getByRole('region', { name: 'Filtros de leads' });
+  const filas = page.locator('tbody tr');
+
+  // Se espera la peticion real: confirma que el filtro viaja a la API y no
+  // se resuelve en memoria.
+  const respuesta = page.waitForResponse(
+    (r) => r.url().includes('/api/leads?') && r.url().includes('status=Reservado'),
+  );
+  await filtros.getByLabel('Estado').selectOption('Reservado');
+  await respuesta;
+
+  // exact: true porque la celda de acciones lleva una etiqueta oculta que
+  // tambien contiene el nombre del lead.
+  await expect(filas).toHaveCount(RESERVADOS.length);
+  for (const nombre of RESERVADOS) {
+    await expect(page.getByRole('cell', { name: nombre, exact: true })).toBeVisible();
+  }
+
+  // Al limpiar vuelve la pagina completa, sin depender de nombres concretos:
+  // el orden es por fecha y otras pruebas agregan leads mas recientes.
+  await filtros.getByRole('button', { name: 'Limpiar filtros' }).click();
+  await expect(filas).toHaveCount(10);
+});
+
+test('crea un lead y lo muestra en la tabla', async ({ page }) => {
+  // Nombre unico: la suite puede correr varias veces sobre la misma base.
+  const marca = Date.now();
+  const nombre = `Prueba E2E ${marca}`;
+
+  await page.getByRole('button', { name: 'Nuevo lead' }).click();
+
+  const dialogo = page.getByRole('dialog', { name: 'Nuevo lead' });
+  await dialogo.getByLabel('Nombre').fill(nombre);
+  await dialogo.getByLabel('Correo').fill(`e2e-${marca}@example.com`);
+  await dialogo.getByLabel('Presupuesto').fill('250000');
+  await dialogo.getByLabel('Proyecto').fill('Vista Verde');
+  await dialogo.getByRole('button', { name: 'Crear lead' }).click();
+
+  await expect(dialogo).toBeHidden();
+
+  // El orden por defecto es por fecha descendente, asi que el recien creado
+  // encabeza la tabla.
+  await expect(
+    page.locator('tbody tr').first().getByRole('cell', { name: nombre, exact: true }),
+  ).toBeVisible();
+});
+
+test('cambiar el estado de un lead lo refleja en la fila', async ({ page }) => {
+  // Se trabaja sobre la primera fila y no sobre un nombre del seed: crear un
+  // lead desplaza a los mas antiguos fuera de la primera pagina. Cada fila
+  // tiene un solo desplegable, asi que el rol basta para identificarlo.
+  const selector = page.locator('tbody tr').first().getByRole('combobox');
+
+  // El estado depende de corridas anteriores sobre la misma base: se elige
+  // uno distinto al actual para que el evento de cambio se dispare siempre.
+  const actual = await selector.inputValue();
+  const nuevo = actual === 'Calificado' ? 'Contactado' : 'Calificado';
+
+  const respuesta = page.waitForResponse(
+    (r) => r.request().method() === 'PATCH' && r.url().includes('/status'),
+  );
+  await selector.selectOption(nuevo);
+  await respuesta;
+
+  // Se comprueba sobre el select, no sobre el texto de la fila: las opciones
+  // del desplegable contienen todos los estados y el texto seria ambiguo.
+  await expect(page.locator('tbody tr').first().getByRole('combobox')).toHaveValue(nuevo);
+});

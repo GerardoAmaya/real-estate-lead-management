@@ -11,17 +11,9 @@ const leadSchema = new Schema(
     budget: { type: Number, required: true, min: 1 },
     project: { type: String, required: true, trim: true, maxlength: 120 },
   },
-  {
-    timestamps: true,
-    versionKey: false,
-    toJSON: {
-      virtuals: true,
-      transform: (_doc, ret: Record<string, unknown>) => {
-        delete ret._id;
-        return ret;
-      },
-    },
-  },
+  // La forma publica del recurso la define serialize() en lead.service.ts:
+  // con lean() el transform de toJSON no se ejecutaria y habria dos formas.
+  { timestamps: true, versionKey: false },
 );
 
 // Los indices NO se declaran aqui: viven en migrations/*-create-leads-indexes.js
