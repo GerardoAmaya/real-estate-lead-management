@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/coverage
+**/.angular
+.git
+.github
+.env
+.env.*
+!.env.example
+**/*.log
+**/*.spec.ts
+**/*.test.ts
+frontend

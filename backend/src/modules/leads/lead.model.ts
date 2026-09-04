@@ -24,14 +24,8 @@ const leadSchema = new Schema(
   },
 );
 
-// Indices alineados con los filtros del enunciado. Los compuestos anteponen
-// el campo filtrado y cierran con el de ordenamiento (patron ESR).
-leadSchema.index({ status: 1, createdAt: -1 });
-leadSchema.index({ source: 1, createdAt: -1 });
-leadSchema.index({ project: 1, createdAt: -1 });
-leadSchema.index({ createdAt: -1 });
-leadSchema.index({ budget: -1 });
-leadSchema.index({ email: 1 });
+// Los indices NO se declaran aqui: viven en migrations/*-create-leads-indexes.js
+// para tener una sola fuente de verdad y control explicito sobre su creacion.
 
 export type Lead = InferSchemaType<typeof leadSchema>;
 export type LeadDocument = HydratedDocument<Lead>;
