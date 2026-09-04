@@ -69,14 +69,21 @@ import {
               <label class="sr-only" [attr.for]="'status-' + lead.id">
                 Cambiar estado de {{ lead.name }}
               </label>
+              <!-- La seleccion se marca en la opcion, no en el select: Angular
+                   asigna value antes de crear las opciones y se perderia. -->
               <select
                 [id]="'status-' + lead.id"
                 class="field-input w-40 py-1 text-xs"
-                [value]="lead.status"
                 [disabled]="updatingId === lead.id"
                 (change)="onStatusChange(lead, $any($event.target).value)"
               >
-                <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+                <option
+                  *ngFor="let status of statuses"
+                  [value]="status"
+                  [selected]="status === lead.status"
+                >
+                  {{ status }}
+                </option>
               </select>
             </td>
           </tr>

@@ -24,11 +24,16 @@ import {
           <select
             id="filter-status"
             class="field-input"
-            [value]="filters.status ?? ''"
             (change)="emit('status', $any($event.target).value)"
           >
-            <option value="">Todos</option>
-            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+            <option value="" [selected]="!filters.status">Todos</option>
+            <option
+              *ngFor="let status of statuses"
+              [value]="status"
+              [selected]="status === filters.status"
+            >
+              {{ status }}
+            </option>
           </select>
         </div>
 
@@ -37,11 +42,16 @@ import {
           <select
             id="filter-source"
             class="field-input"
-            [value]="filters.source ?? ''"
             (change)="emit('source', $any($event.target).value)"
           >
-            <option value="">Todas</option>
-            <option *ngFor="let source of sources" [value]="source">{{ source }}</option>
+            <option value="" [selected]="!filters.source">Todas</option>
+            <option
+              *ngFor="let source of sources"
+              [value]="source"
+              [selected]="source === filters.source"
+            >
+              {{ source }}
+            </option>
           </select>
         </div>
 
@@ -50,11 +60,16 @@ import {
           <select
             id="filter-project"
             class="field-input"
-            [value]="filters.project ?? ''"
             (change)="emit('project', $any($event.target).value)"
           >
-            <option value="">Todos</option>
-            <option *ngFor="let project of projects" [value]="project">{{ project }}</option>
+            <option value="" [selected]="!filters.project">Todos</option>
+            <option
+              *ngFor="let project of projects"
+              [value]="project"
+              [selected]="project === filters.project"
+            >
+              {{ project }}
+            </option>
           </select>
         </div>
 
