@@ -32,6 +32,22 @@ export function createApp(): Express {
         return id;
       },
       autoLogging: { ignore: (req) => req.url === '/api/health' },
+      // Una linea por peticion en lugar del volcado completo de req y res.
+      customSuccessMessage: (req, res) => `${req.method ?? ''} ${req.url ?? ''} ${res.statusCode}`,
+      customErrorMessage: (req, res, error) =>
+        `${req.method ?? ''} ${req.url ?? ''} ${res.statusCode} - ${error.message}`,
+      customLogLevel: (_req, res, error) => {
+        if (error || res.statusCode >= 500) return 'error';
+        if (res.statusCode >= 400) return 'warn';
+        return 'info';
+      },
+      // El manejador de errores ya registra el error real con su contexto;
+      // el que sintetiza pino-http solo duplicaria el stack trace.
+      serializers: {
+        req: () => undefined,
+        res: () => undefined,
+        err: () => undefined,
+      },
     }),
   );
 

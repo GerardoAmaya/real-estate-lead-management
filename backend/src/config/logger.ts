@@ -19,8 +19,17 @@ export const logger = pino({
   redact: { paths: redactPaths, censor: '[REDACTED]' },
   base: { service: 'real-estate-lead-management-api' },
   timestamp: pino.stdTimeFunctions.isoTime,
-  // En desarrollo se formatea legible; en produccion queda JSON para agregadores.
+  // En produccion queda JSON plano para los agregadores; en desarrollo se
+  // formatea legible ocultando campos que solo importan en produccion.
   transport: env.isProduction
     ? undefined
-    : { target: 'pino-pretty', options: { colorize: true, translateTime: 'HH:MM:ss' } },
+    : {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'HH:MM:ss',
+          ignore: 'pid,hostname,service,reqId',
+          singleLine: true,
+        },
+      },
 });
