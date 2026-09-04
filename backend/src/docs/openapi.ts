@@ -1,7 +1,12 @@
 import { env } from '../config/env';
 import { ErrorCode } from '../shared/errors/AppError';
-import { LEAD_SOURCES, LEAD_STATUSES, SORTABLE_FIELDS } from '../modules/leads/lead.constants';
-import { MAX_LIMIT, schemas } from './components';
+import {
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  MAX_PAGE_SIZE,
+  SORTABLE_FIELDS,
+} from '../modules/leads/lead.constants';
+import { schemas } from './components';
 
 interface ErrorDetailExample {
   field: string;
@@ -216,8 +221,8 @@ export const openApiDocument = {
           {
             name: 'limit',
             in: 'query',
-            schema: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, default: 10 },
-            description: `Tamano de pagina. El maximo es ${String(MAX_LIMIT)} para evitar consumo excesivo de recursos.`,
+            schema: { type: 'integer', minimum: 1, maximum: MAX_PAGE_SIZE, default: 10 },
+            description: `Tamano de pagina. El maximo es ${String(MAX_PAGE_SIZE)} para evitar consumo excesivo de recursos.`,
           },
           {
             name: 'sortBy',

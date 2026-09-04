@@ -18,6 +18,18 @@ function requestPath(req: IncomingMessage & { originalUrl?: string }): string {
   return req.originalUrl ?? req.url ?? '';
 }
 
+// El origen propio siempre se permite: Swagger UI se sirve desde la misma
+// API, y comparar contra el host de la peticion funciona igual en local, en
+// Docker y detras de un dominio, sin listar puertos a mano.
+function isSameOrigin(origin: string, host: string | undefined): boolean {
+  if (!host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
 // La app se exporta sin escuchar en un puerto: asi los tests la montan
 // con Supertest sin abrir sockets ni conectar a la base de datos.
 export function createApp(): Express {
@@ -72,18 +84,6 @@ export function createApp(): Express {
     }),
   );
   app.use(compression());
-
-  // El origen propio siempre se permite: Swagger UI se sirve desde la misma
-  // API, y comparar contra el host de la peticion funciona igual en local,
-  // en Docker y detras de un dominio, sin listar puertos a mano.
-  function isSameOrigin(origin: string, host: string | undefined): boolean {
-    if (!host) return false;
-    try {
-      return new URL(origin).host === host;
-    } catch {
-      return false;
-    }
-  }
 
   app.use(
     cors((req, callback) => {

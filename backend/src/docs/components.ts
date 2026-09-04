@@ -1,4 +1,4 @@
-import { LEAD_SOURCES, LEAD_STATUSES, MAX_PAGE_SIZE } from '../modules/leads/lead.constants';
+import { LEAD_SOURCES, LEAD_STATUSES } from '../modules/leads/lead.constants';
 import { ErrorCode } from '../shared/errors/AppError';
 
 // Los enums salen de las constantes del dominio: la documentacion no puede
@@ -171,5 +171,3 @@ export const schemas = {
     },
   },
 } as const;
-
-export const MAX_LIMIT = MAX_PAGE_SIZE;
