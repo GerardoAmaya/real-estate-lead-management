@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import { env } from './env';
 import { logger } from './logger';
 
-// autoIndex desactivado en produccion: crear indices al arrancar bloquea
-// colecciones grandes. Los indices se crean por migracion controlada.
-mongoose.set('autoIndex', !env.isProduction);
+// autoIndex siempre desactivado: los indices se crean por migracion, nunca
+// al arrancar. Evita bloqueos en colecciones grandes y duplicidad de nombres.
+mongoose.set('autoIndex', false);
 mongoose.set('strictQuery', true);
 
 export async function connectDatabase(uri: string = env.MONGODB_URI): Promise<void> {

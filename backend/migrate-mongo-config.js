@@ -1,7 +1,7 @@
 // Configuracion de migrate-mongo: los indices y validators se crean aqui,
 // nunca con autoIndex de Mongoose (bloqueante en colecciones grandes).
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env'), quiet: true });
 
 module.exports = {
   mongodb: {

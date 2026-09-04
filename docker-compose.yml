@@ -24,8 +24,8 @@ services:
   api:
     profiles: [full]
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       target: production
     container_name: rel-api
     restart: unless-stopped
@@ -36,6 +36,8 @@ services:
       PORT: 3000
       # Dentro de la red de Docker el host es el nombre del servicio, no localhost
       MONGODB_URI: mongodb://mongo:27017/${MONGODB_DB_NAME:-real_estate_leads}
+      # La ruta de los datos cambia dentro de la imagen
+      SEED_DATA_DIR: /app/seed/data
     ports:
       - '3000:3000'
     depends_on:

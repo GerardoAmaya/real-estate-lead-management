@@ -1,13 +1,16 @@
+# Contexto de build: la raiz del repositorio, porque la imagen necesita
+# tanto backend/ como los datos de seed/.
+
 # --- Etapa 1: compilacion (incluye devDependencies) ---
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci
 
-COPY tsconfig*.json ./
-COPY src ./src
+COPY backend/tsconfig*.json ./
+COPY backend/src ./src
 
 RUN npm run build
 
@@ -20,12 +23,13 @@ RUN apk add --no-cache dumb-init
 ENV NODE_ENV=production
 WORKDIR /app
 
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
-COPY migrations ./migrations
-COPY migrate-mongo-config.js ./
+COPY backend/migrations ./migrations
+COPY backend/migrate-mongo-config.js ./
+COPY seed ./seed
 
 # El usuario "node" ya existe en la imagen base; nunca ejecutar como root
 USER node

@@ -12,22 +12,19 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
-
     "migrate:up": "migrate-mongo up -f migrate-mongo-config.js",
     "migrate:down": "migrate-mongo down -f migrate-mongo-config.js",
     "migrate:status": "migrate-mongo status -f migrate-mongo-config.js",
     "migrate:create": "migrate-mongo create -f migrate-mongo-config.js",
-
-    "seed": "tsx ../seed/seed.ts",
-    "seed:fresh": "tsx ../seed/seed.ts --fresh",
-
+    "seed": "tsx src/scripts/seed.ts",
+    "seed:fresh": "tsx src/scripts/seed.ts --fresh",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
     "test:cov": "jest --coverage --runInBand",
-
     "lint": "eslint src --max-warnings 0",
     "lint:fix": "eslint src --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:prod": "node dist/scripts/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
