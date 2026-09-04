@@ -429,5 +429,5 @@ endpoint de reinicio disponible solo fuera de producción.
 
 ## Uso de inteligencia artificial
 
-Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de seguridad y revisión de redacción. En todos los casos se verificó manualmente la salida y se corrigieron errores de interpretación, y se hicieron varias iteraciones hasta que la salida fue correcta y completa. No se usó para tomar decisiones de arquitectura, y no se confió en la salida sin revisión humana.
+Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de seguridad y revisión de redacción. En todos los casos se verificó manualmente la salida y se corrigieron errores de interpretación, y se hicieron varias iteraciones hasta que la salida fue correcta y completa. No se confió en la salida sin revisión humana.
 
