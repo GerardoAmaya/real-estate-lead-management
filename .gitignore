@@ -1,0 +1,44 @@
+# Dependencias
+node_modules/
+.pnp/
+.pnp.js
+
+# Variables de entorno — nunca versionar valores reales
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Compilados
+dist/
+build/
+out-tsc/
+*.tsbuildinfo
+
+# Angular
+.angular/
+frontend/dist/
+
+# Testing y cobertura
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Editores y sistema operativo
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker-data/
