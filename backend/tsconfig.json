@@ -22,6 +22,7 @@
     "removeComments": false,
 
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],

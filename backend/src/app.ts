@@ -21,7 +21,7 @@ function requestPath(req: IncomingMessage & { originalUrl?: string }): string {
 // El origen propio siempre se permite: Swagger UI se sirve desde la misma
 // API, y comparar contra el host de la peticion funciona igual en local, en
 // Docker y detras de un dominio, sin listar puertos a mano.
-function isSameOrigin(origin: string, host: string | undefined): boolean {
+export function isSameOrigin(origin: string, host: string | undefined): boolean {
   if (!host) return false;
   try {
     return new URL(origin).host === host;
