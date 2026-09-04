@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela ejecuciones previas de la misma rama al llegar un push nuevo.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # SonarCloud necesita el historico completo para el blame.
+          fetch-depth: 0
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: Verificacion de tipos
+        working-directory: backend
+        run: npm run typecheck
+
+      - name: Pruebas con cobertura
+        working-directory: backend
+        run: npm run test:cov
+
+      - name: Compilacion
+        working-directory: backend
+        run: npm run build
+
+      # Falla solo ante vulnerabilidades altas o criticas: las moderadas de
+      # dependencias transitivas no deben bloquear la integracion.
+      - name: Auditoria de dependencias
+        working-directory: backend
+        run: npm audit --audit-level=high
+
+      - name: Analisis de SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  docker:
+    name: Imagen Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Comprueba que la imagen de produccion compila; no la publica.
+      - name: Construir la imagen del backend
+        run: docker build -f backend/Dockerfile --target production -t rel-api:ci .
