@@ -81,9 +81,8 @@ Al terminar:
 | Servicio              | URL                              |
 | --------------------- | -------------------------------- |
 | Aplicación Angular    | http://localhost:4200            |
-| API                   | http://localhost:3000/api        |
-| Documentación Swagger | http://localhost:3000/api/docs   |
 | Health check          | http://localhost:3000/api/health |
+| Documentación Swagger | http://localhost:3000/api/docs   |
 
 Credenciales del usuario que crea el seed, tomadas de `SEED_ADMIN_EMAIL` y
 `SEED_ADMIN_PASSWORD`:
