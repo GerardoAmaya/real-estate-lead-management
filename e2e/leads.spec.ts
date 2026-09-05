@@ -18,7 +18,7 @@ const PROSPECTOS = [
 const INDICADORES = [
   'Total de leads',
   'Presupuesto promedio',
-  'Tasa de conversion',
+  'Tasa de conversión',
   'Leads reservados',
 ];
 

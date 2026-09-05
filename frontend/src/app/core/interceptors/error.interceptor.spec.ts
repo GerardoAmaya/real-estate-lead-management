@@ -39,6 +39,6 @@ describe('toMessage', () => {
   it('degrada con elegancia si la respuesta no tiene el formato esperado', () => {
     const error = new HttpErrorResponse({ status: 500, error: 'texto plano' });
 
-    expect(toMessage(error)).toBe('Ocurrio un error inesperado.');
+    expect(toMessage(error)).toBe('Ocurrió un error inesperado.');
   });
 });

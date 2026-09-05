@@ -208,7 +208,7 @@ export class LeadsDashboardComponent {
 
   protected onLogout(): void {
     this.auth.logout();
-    void this.announcer.announce('Sesion cerrada.');
+    void this.announcer.announce('Sesión cerrada.');
     void this.router.navigate(['/login']);
   }
 

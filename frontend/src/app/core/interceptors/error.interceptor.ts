@@ -9,13 +9,13 @@ import type { ApiErrorResponse } from '../models/api-error.model';
 // error unico de la API y sus "details" de validacion.
 export function toMessage(error: HttpErrorResponse): string {
   if (error.status === 0) {
-    return 'No se pudo conectar con el servidor. Verifique que la API este disponible.';
+    return 'No se pudo conectar con el servidor. Verifique que la API esté disponible.';
   }
 
   const body = error.error as ApiErrorResponse | null;
   const apiError = body?.error;
 
-  if (!apiError) return 'Ocurrio un error inesperado.';
+  if (!apiError) return 'Ocurrió un error inesperado.';
 
   if (apiError.details?.length) {
     return apiError.details.map((detail) => `${detail.field}: ${detail.message}`).join(' · ');

@@ -2,7 +2,7 @@
   <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-xl font-semibold text-slate-900">Seguimiento de leads</h1>
-      <p class="mt-1 text-sm text-slate-500">Indicadores y gestion de prospectos inmobiliarios.</p>
+      <p class="mt-1 text-sm text-slate-500">Indicadores y gestión de prospectos inmobiliarios.</p>
     </div>
 
     <div class="flex items-center gap-3">
@@ -53,7 +53,7 @@
           [loading]="summary.status === 'loading'"
         />
         <app-kpi-card
-          label="Tasa de conversion"
+          label="Tasa de conversión"
           [icon]="icons.conversion"
           format="percent"
           [value]="summary.status === 'success' ? summary.data.conversionRate : null"

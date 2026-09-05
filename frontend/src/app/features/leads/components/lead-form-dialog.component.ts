@@ -63,14 +63,14 @@ interface LeadFormControls {
             {{
               form.controls.email.hasError('required')
                 ? 'El correo es obligatorio.'
-                : 'El correo no tiene un formato valido.'
+                : 'El correo no tiene un formato válido.'
             }}
           </p>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="field-label" for="lead-phone">Telefono (opcional)</label>
+            <label class="field-label" for="lead-phone">Teléfono (opcional)</label>
             <input id="lead-phone" class="field-input" formControlName="phone" autocomplete="off" />
           </div>
 

@@ -79,7 +79,7 @@ describe('LoginPageComponent', () => {
 
     expect(httpMock.match(loginUrl)).toHaveSize(0);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'El correo no tiene un formato valido.',
+      'El correo no tiene un formato válido.',
     );
   });
 
