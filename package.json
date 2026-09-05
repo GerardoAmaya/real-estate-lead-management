@@ -4,11 +4,12 @@
   "private": true,
   "description": "Modulo de seguimiento de leads inmobiliarios - Angular 16 + Express + MongoDB",
   "engines": {
-    "node": ">=20.0.0 <21"
+    "node": ">=20.19.0 <21"
   },
   "scripts": {
+    "preinstall": "node scripts/check-node.js",
     "postinstall": "npm run install:all",
-    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "db:up": "docker compose up -d mongo",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d mongo",

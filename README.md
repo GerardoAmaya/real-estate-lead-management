@@ -50,11 +50,14 @@ incidente, arquitectura en AWS, plan de migración y seguridad) está en
 
 ## Requisitos
 
-| Herramienta | Versión       | Nota                                          |
-| ----------- | ------------- | --------------------------------------------- |
-| Node.js     | 20.19.0       | Fijada en `.nvmrc`. Con `nvm` basta `nvm use` |
-| npm         | 10 o superior | Viene con Node 20                             |
-| Docker      | 24 o superior | Solo para MongoDB, o para el stack completo   |
+| Herramienta | Versión       | Nota                                        |
+| ----------- | ------------- | ------------------------------------------- |
+| Node.js     | 20.19.0       | Fijada en `.nvmrc` (ver nota abajo)         |
+| npm         | 10 o superior | Viene con Node 20                           |
+| Docker      | 24 o superior | Solo para MongoDB, o para el stack completo |
+
+`nvm` para Windows no lee `.nvmrc`: hay que indicar la versión a mano con
+`nvm install 20.19.0` y `nvm use 20.19.0`. En macOS y Linux basta `nvm use`.
 
 No hace falta instalar MongoDB en la máquina: el `docker-compose.yml` levanta
 la instancia, y las pruebas usan una base en memoria.
@@ -64,7 +67,7 @@ la instancia, y las pruebas usan una base en memoria.
 Desde la raíz del repositorio:
 
 ```bash
-nvm use                # Node 20 (ver .nvmrc)
+nvm use                # Node 20 (en Windows: nvm use 20.19.0)
 cp .env.example .env   # valores por defecto listos para desarrollo
 npm install            # instala raíz, backend y frontend
 npm run db:up          # MongoDB 7 en Docker, puerto 27017
@@ -93,6 +96,21 @@ La aplicación pide sesión al entrar: la ruta `/leads` está protegida por un
 guard y sin sesión se redirige a `/login`, conservando el destino para volver a
 él después. La pantalla de acceso muestra estas credenciales y tiene un botón
 que las carga en el formulario, así que no hace falta copiarlas.
+
+### Problemas frecuentes
+
+**`npm install` se detiene diciendo que la versión de Node no sirve.** Es el
+`preinstall` de la raíz (`scripts/check-node.js`), que compara tu Node con el
+`.nvmrc` y corta antes de dejar el entorno a medias. La 20.19.0 no es un capricho:
+alguna dependencia de ESLint ya exige `^20.19.0`, así que una 20.10 tampoco vale.
+
+**`nvm use` responde `version argument required`.** `nvm` para Windows no lee
+`.nvmrc`; hay que indicar la versión a mano con `nvm install 20.19.0` y
+`nvm use 20.19.0`.
+
+**`EPERM: operation not permitted, rmdir`.** Algún proceso tiene bloqueado
+`node_modules`. Cierra el editor y los procesos `node` en ejecución, y vuelve a
+lanzar `npm install`.
 
 ### Comandos disponibles
 
