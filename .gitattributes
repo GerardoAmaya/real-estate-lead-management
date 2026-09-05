@@ -1,0 +1,8 @@
+# El working tree en Windows se llenaba de CRLF por core.autocrlf, y Prettier
+# esta configurado con endOfLine "lf": eso hacia fallar "npm run format:check"
+# en local sobre todos los archivos, aunque en CI (Linux) pasara.
+* text=auto eol=lf
+
+# Binarios: sin conversion de finales de linea.
+*.png binary
+*.ico binary
