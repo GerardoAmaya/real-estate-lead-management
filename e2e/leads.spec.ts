@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const RESERVADOS = ['Andrea Martínez', 'Daniela Cruz'];
-
 // Prospectos con forma de dato real: si alguna corrida deja registros en la
 // base, la pantalla sigue siendo presentable para una demostracion.
 const PROSPECTOS = [
@@ -40,6 +38,7 @@ test('muestra los cuatro indicadores del dashboard', async ({ page }) => {
 test('filtrar por estado consulta al backend y acota la tabla', async ({ page }) => {
   const filtros = page.getByRole('region', { name: 'Filtros de leads' });
   const filas = page.locator('tbody tr');
+  const sinFiltro = await filas.count();
 
   // Se espera la peticion real: confirma que el filtro viaja a la API y no
   // se resuelve en memoria.
@@ -49,17 +48,18 @@ test('filtrar por estado consulta al backend y acota la tabla', async ({ page })
   await filtros.getByLabel('Estado').selectOption('Reservado');
   await respuesta;
 
-  // exact: true porque la celda de acciones lleva una etiqueta oculta que
-  // tambien contiene el nombre del lead.
-  await expect(filas).toHaveCount(RESERVADOS.length);
-  for (const nombre of RESERVADOS) {
-    await expect(page.getByRole('cell', { name: nombre, exact: true })).toBeVisible();
+  // Se comprueba la invariante, no un numero: toda fila devuelta cumple el
+  // filtro. Cuantos leads haya en la base depende de corridas anteriores.
+  const filtradas = await filas.count();
+  expect(filtradas).toBeGreaterThan(0);
+  expect(filtradas).toBeLessThan(sinFiltro);
+
+  for (let i = 0; i < filtradas; i++) {
+    await expect(filas.nth(i).getByRole('combobox')).toHaveValue('Reservado');
   }
 
-  // Al limpiar vuelve la pagina completa, sin depender de nombres concretos:
-  // el orden es por fecha y otras pruebas agregan leads mas recientes.
   await filtros.getByRole('button', { name: 'Limpiar filtros' }).click();
-  await expect(filas).toHaveCount(10);
+  await expect(filas).toHaveCount(sinFiltro);
 });
 
 test('crea un lead y lo muestra en la tabla', async ({ page }) => {
