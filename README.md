@@ -25,9 +25,6 @@ consulta de agregación.
 | :------------------------------------------------: | :-----------------------------------------------------: |
 | <img src="docs/screenshots/login.png" width="430"> | <img src="docs/screenshots/nuevo-lead.png" width="430"> |
 
-<sub>Las capturas se generan con <code>npm run screenshots</code>, que recorre la
-aplicación real con Playwright sobre una base recién sembrada.</sub>
-
 </div>
 
 El análisis escrito que acompaña a la prueba (modelo de datos, diagnóstico de
