@@ -367,10 +367,7 @@ docker:reset` y levantar de nuevo.
 GitHub Actions corre en cada push y pull request cinco trabajos: backend y
 frontend en paralelo, cada uno con lint, typecheck, pruebas y cobertura;
 SonarCloud, que espera a los dos y analiza ambos informes juntos; uno que
-construye las tres imágenes de Docker para que un fallo de build no aparezca
-recién al desplegar; y uno de extremo a extremo que levanta el stack completo
-con Docker, espera al healthcheck a través de nginx y corre Playwright,
-publicando el reporte como artefacto si algo falla.
+construye las tres imágenes de Docker para detectar errores de build; y uno de extremo a extremo que levanta el stack completo con Docker, espera al healthcheck a través de nginx y corre Playwright, publicando el reporte como artefacto si algo falla.
 
 El quality gate de SonarCloud exige 80% de cobertura sobre código nuevo, y el
 proyecto es público: el informe se puede abrir desde la insignia de arriba sin
