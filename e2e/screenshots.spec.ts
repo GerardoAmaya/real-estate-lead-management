@@ -21,7 +21,7 @@ test('captura la pantalla de acceso', async ({ page }) => {
 test('captura el dashboard', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Correo').fill('admin@example.com');
-  await page.getByLabel('Contrasena').fill('Admin123!');
+  await page.getByLabel('Contraseña').fill('Admin123!');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page.getByRole('heading', { name: 'Seguimiento de leads' })).toBeVisible();
@@ -32,7 +32,7 @@ test('captura el dashboard', async ({ page }) => {
 test('captura el formulario de nuevo lead', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Correo').fill('admin@example.com');
-  await page.getByLabel('Contrasena').fill('Admin123!');
+  await page.getByLabel('Contraseña').fill('Admin123!');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await page.getByRole('button', { name: 'Nuevo lead' }).click();

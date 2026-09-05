@@ -21,7 +21,7 @@ test.describe('control de acceso', () => {
     await page.goto('/login');
 
     await page.getByLabel('Correo').fill('admin@example.com');
-    await page.getByLabel('Contrasena').fill('contrasena-incorrecta');
+    await page.getByLabel('Contraseña').fill('contrasena-incorrecta');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
     await expect(page.getByRole('alert')).toBeVisible();

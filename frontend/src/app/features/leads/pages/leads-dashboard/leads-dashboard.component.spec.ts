@@ -1,10 +1,11 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { authInterceptor } from '../../../../core/interceptors/auth.interceptor';
 import { errorInterceptor } from '../../../../core/interceptors/error.interceptor';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -266,6 +267,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
   let httpMock: HttpTestingController;
   let dialog: jasmine.SpyObj<Dialog>;
   let router: jasmine.SpyObj<Router>;
+  let toasts: ToastService;
 
   const leadsUrl = `${environment.apiUrl}/leads`;
   const summaryUrl = `${environment.apiUrl}/dashboard/summary`;
@@ -307,6 +309,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
 
     fixture = TestBed.createComponent(LeadsDashboardComponent);
     httpMock = TestBed.inject(HttpTestingController);
+    toasts = TestBed.inject(ToastService);
 
     fixture.detectChanges();
     httpMock.expectOne((r) => r.url === leadsUrl).flush(PAGE);
@@ -316,6 +319,9 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
 
   afterEach(() => {
     localStorage.clear();
+    // Los avisos son un servicio de raiz: sin limpiarlos, una prueba veria los
+    // de la anterior.
+    toasts.toasts().forEach((toast) => toasts.dismiss(toast.id));
   });
 
   function drainPendingRequests(): void {
@@ -338,6 +344,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
     // La recarga vuelve a pedir listado y resumen.
     expect(httpMock.match((r) => r.url === summaryUrl)).toHaveSize(1);
     drainPendingRequests();
+    flush();
   }));
 
   it('no envia nada si se cancela el dialogo de creacion', fakeAsync(() => {
@@ -347,7 +354,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
     tick();
 
     httpMock.expectNone((r) => r.method === 'POST');
-    expect(fixture.componentInstance['actionError']()).toBeNull();
+    expect(toasts.toasts()).toHaveSize(0);
   }));
 
   it('muestra el error devuelto por la API si la creacion falla', fakeAsync(() => {
@@ -364,8 +371,10 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
       );
     fixture.detectChanges();
 
-    expect(fixture.componentInstance['actionError']()).toBe('Datos invalidos');
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Datos invalidos');
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({ variant: 'error', message: 'Datos invalidos' }),
+    ]);
+    flush();
   }));
 
   it('actualiza el estado y limpia el indicador de fila en curso', fakeAsync(() => {
@@ -383,7 +392,14 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance['updatingId']()).toBeNull();
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({
+        variant: 'success',
+        message: jasmine.stringContaining('Reservado'),
+      }),
+    ]);
     drainPendingRequests();
+    flush();
   }));
 
   it('recarga y muestra el error si la actualizacion de estado falla', fakeAsync(() => {
@@ -398,10 +414,13 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
       );
     fixture.detectChanges();
 
-    expect(fixture.componentInstance['actionError']()).toBe('No existe el lead');
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({ variant: 'error', message: 'No existe el lead' }),
+    ]);
     // La fila deja de estar bloqueada aunque haya fallado.
     expect(fixture.componentInstance['updatingId']()).toBeNull();
     drainPendingRequests();
+    flush();
   }));
 
   it('cierra la sesion, borra el token y vuelve al acceso', () => {

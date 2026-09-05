@@ -32,21 +32,34 @@
       </div>
 
       <div>
-        <label class="field-label" for="password">Contrasena</label>
-        <input
-          id="password"
-          type="password"
-          class="field-input"
-          formControlName="password"
-          autocomplete="current-password"
-          [attr.aria-invalid]="invalid('password')"
-          [attr.aria-describedby]="invalid('password') ? 'password-error' : null"
-        />
+        <label class="field-label" for="password">Contraseña</label>
+        <div class="relative">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            class="field-input pr-10"
+            formControlName="password"
+            autocomplete="current-password"
+            [attr.aria-invalid]="invalid('password')"
+            [attr.aria-describedby]="invalid('password') ? 'password-error' : null"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-slate-600"
+            [attr.aria-pressed]="showPassword()"
+            (click)="togglePassword()"
+          >
+            <span class="sr-only">
+              {{ showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña' }}
+            </span>
+            <fa-icon [icon]="showPassword() ? icons.hide : icons.show" aria-hidden="true" />
+          </button>
+        </div>
         <p *ngIf="invalid('password')" id="password-error" class="field-error">
           {{
             form.controls.password.hasError('required')
-              ? 'La contrasena es obligatoria.'
-              : 'La contrasena debe tener al menos 8 caracteres.'
+              ? 'La contraseña es obligatoria.'
+              : 'La contraseña debe tener al menos 8 caracteres.'
           }}
         </p>
       </div>
@@ -62,7 +75,7 @@
     </form>
 
     <div class="mt-4 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-      <p class="font-medium text-slate-700">Credenciales de demostracion</p>
+      <p class="font-medium text-slate-700">Credenciales de demostración</p>
       <p class="mt-1">admin&#64;example.com / Admin123!</p>
       <button
         type="button"

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faBuilding, faRightToBracket } from '@fortawesome/free-solid-svg-icons';
+import { faBuilding, faEye, faEyeSlash, faRightToBracket } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
@@ -19,7 +19,14 @@ export class LoginPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly icons = { brand: faBuilding, submit: faRightToBracket };
+  protected readonly icons = {
+    brand: faBuilding,
+    submit: faRightToBracket,
+    show: faEye,
+    hide: faEyeSlash,
+  };
+
+  protected readonly showPassword = signal(false);
 
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -54,6 +61,10 @@ export class LoginPageComponent {
   // Atajo para el evaluador: evita tener que copiar las credenciales del README.
   protected useDemoCredentials(): void {
     this.form.setValue({ email: 'admin@example.com', password: 'Admin123!' });
+  }
+
+  protected togglePassword(): void {
+    this.showPassword.update((visible) => !visible);
   }
 
   protected invalid(control: 'email' | 'password'): boolean {

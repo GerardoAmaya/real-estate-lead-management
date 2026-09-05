@@ -68,7 +68,7 @@ describe('LoginPageComponent', () => {
     expect(httpMock.match(loginUrl)).toHaveSize(0);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('El correo es obligatorio.');
-    expect(text).toContain('La contrasena es obligatoria.');
+    expect(text).toContain('La contraseña es obligatoria.');
   });
 
   it('rechaza un correo con formato invalido antes de llamar a la API', async () => {
@@ -108,6 +108,29 @@ describe('LoginPageComponent', () => {
     httpMock.expectOne(loginUrl).flush(RESPONSE);
 
     expect(router.navigateByUrl).toHaveBeenCalledWith('/leads?page=2');
+  });
+
+  it('alterna la visibilidad de la contraseña', async () => {
+    await setup();
+
+    const campo = (fixture.nativeElement as HTMLElement).querySelector('#password');
+    const boton = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '#password ~ button, .relative button',
+    );
+
+    expect(campo?.getAttribute('type')).toBe('password');
+
+    boton?.click();
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('#password')?.getAttribute('type'),
+    ).toBe('text');
+
+    boton?.click();
+    fixture.detectChanges();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('#password')?.getAttribute('type'),
+    ).toBe('password');
   });
 
   it('muestra el mensaje de la API y no navega cuando las credenciales fallan', async () => {

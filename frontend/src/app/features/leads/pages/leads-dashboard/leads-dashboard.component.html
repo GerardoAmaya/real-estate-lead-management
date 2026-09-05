@@ -26,14 +26,6 @@
     </div>
   </header>
 
-  <p
-    *ngIf="actionError()"
-    class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
-    role="alert"
-  >
-    {{ actionError() }}
-  </p>
-
   <!-- Indicadores -->
   <section aria-label="Indicadores" class="mb-6">
     <ng-container *ngIf="summary$ | async as summary">

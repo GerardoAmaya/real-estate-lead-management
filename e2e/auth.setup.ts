@@ -6,7 +6,7 @@ setup('inicia sesion y guarda el estado', async ({ page }) => {
   await page.goto('/login');
 
   await page.getByLabel('Correo').fill('admin@example.com');
-  await page.getByLabel('Contrasena').fill('Admin123!');
+  await page.getByLabel('Contraseña').fill('Admin123!');
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page).toHaveURL(/\/leads/);

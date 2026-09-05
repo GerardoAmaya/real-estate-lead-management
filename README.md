@@ -49,6 +49,7 @@ incidente, arquitectura en AWS, plan de migración y seguridad) está en
 11. [Seguridad](#seguridad)
 12. [Limitaciones conocidas](#limitaciones-conocidas)
 13. [Uso de inteligencia artificial](#uso-de-inteligencia-artificial)
+14. [Autor](#autor)
 
 ## Requisitos
 
@@ -367,7 +368,7 @@ Docker ni una base local. El frontend corre en Chrome headless.
 
 | Paquete  | Pruebas | Cobertura de líneas |
 | -------- | ------- | ------------------- |
-| Backend  | 61      | 92.2%               |
+| Backend  | 62      | 92.2%               |
 | Frontend | 95      | 96.0%               |
 
 Las pruebas cubren el pipeline de agregación con colección vacía y con datos, la
@@ -491,3 +492,11 @@ endpoint de reinicio disponible solo fuera de producción.
 ## Uso de inteligencia artificial
 
 Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de seguridad y revisión de redacción. En todos los casos se verificó manualmente la salida y se corrigieron errores de interpretación, y se hicieron varias iteraciones hasta que la salida fue correcta y completa. No se confió en la salida sin revisión humana.
+
+## Autor
+
+**Gerardo Alberto Amaya**<br>
+Full Stack Engineer
+
+[gerardoamayasv2000@gmail.com](mailto:gerardoamayasv2000@gmail.com) ·
+[linkedin.com/in/gerardoalbertoamaya](https://www.linkedin.com/in/gerardoalbertoamaya/)

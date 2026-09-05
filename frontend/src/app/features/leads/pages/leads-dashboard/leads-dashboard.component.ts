@@ -28,6 +28,7 @@ import {
 import { LeadService } from '../../../../core/services/lead.service';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import {
   DEFAULT_LEAD_QUERY,
   type CreateLeadPayload,
@@ -71,6 +72,7 @@ export class LeadsDashboardComponent {
   private readonly dialog = inject(Dialog);
   private readonly announcer = inject(LiveAnnouncer);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   protected readonly auth = inject(AuthService);
 
   protected readonly icons = {
@@ -101,7 +103,6 @@ export class LeadsDashboardComponent {
     };
   });
   protected readonly updatingId = signal<string | null>(null);
-  protected readonly actionError = signal<string | null>(null);
 
   // distinctUntilChanged evita repetir la misma peticion cuando el usuario
   // vuelve a elegir el valor que ya estaba seleccionado.
@@ -178,29 +179,27 @@ export class LeadsDashboardComponent {
       .closed.subscribe((payload) => {
         if (!payload) return;
 
-        this.actionError.set(null);
         this.leadService.create(payload).subscribe({
           next: (lead) => {
-            void this.announcer.announce(`Lead ${lead.name} creado.`);
+            this.notify('success', `Lead ${lead.name} creado.`);
             this.reload.next();
           },
-          error: (error: Error) => this.actionError.set(error.message),
+          error: (error: Error) => this.notify('error', error.message),
         });
       });
   }
 
   protected onStatusChange({ lead, status }: { lead: Lead; status: LeadStatus }): void {
-    this.actionError.set(null);
     this.updatingId.set(lead.id);
 
     this.leadService.updateStatus(lead.id, status).subscribe({
       next: () => {
-        void this.announcer.announce(`Estado de ${lead.name} actualizado a ${status}.`);
+        this.notify('success', `Estado de ${lead.name} actualizado a ${status}.`);
         this.updatingId.set(null);
         this.reload.next();
       },
       error: (error: Error) => {
-        this.actionError.set(error.message);
+        this.notify('error', error.message);
         this.updatingId.set(null);
         this.reload.next();
       },
@@ -215,5 +214,12 @@ export class LeadsDashboardComponent {
 
   protected onRetry(): void {
     this.reload.next();
+  }
+
+  // Un solo lugar para el resultado de una accion: aviso visible y anuncio
+  // para lectores de pantalla, que de otro modo no se enterarian del cambio.
+  private notify(variant: 'success' | 'error', message: string): void {
+    this.toast[variant](message);
+    void this.announcer.announce(message);
   }
 }
