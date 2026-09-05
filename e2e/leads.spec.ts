@@ -1,6 +1,22 @@
 import { test, expect } from '@playwright/test';
 
 const RESERVADOS = ['Andrea Martínez', 'Daniela Cruz'];
+
+// Prospectos con forma de dato real: si alguna corrida deja registros en la
+// base, la pantalla sigue siendo presentable para una demostracion.
+const PROSPECTOS = [
+  { nombre: 'Valeria Guzmán', correo: 'valeria.guzman@example.com', proyecto: 'Vista Verde' },
+  {
+    nombre: 'Diego Alvarenga',
+    correo: 'diego.alvarenga@example.com',
+    proyecto: 'Torres del Valle',
+  },
+  {
+    nombre: 'Ana Sofía Portillo',
+    correo: 'ana.portillo@example.com',
+    proyecto: 'Residencial Altavista',
+  },
+];
 const INDICADORES = [
   'Total de leads',
   'Presupuesto promedio',
@@ -47,17 +63,16 @@ test('filtrar por estado consulta al backend y acota la tabla', async ({ page })
 });
 
 test('crea un lead y lo muestra en la tabla', async ({ page }) => {
-  // Nombre unico: la suite puede correr varias veces sobre la misma base.
-  const marca = Date.now();
-  const nombre = `Prueba E2E ${marca}`;
+  // Rota entre los prospectos para que corridas seguidas no repitan el mismo.
+  const { nombre, correo, proyecto } = PROSPECTOS[Date.now() % PROSPECTOS.length];
 
   await page.getByRole('button', { name: 'Nuevo lead' }).click();
 
   const dialogo = page.getByRole('dialog', { name: 'Nuevo lead' });
   await dialogo.getByLabel('Nombre').fill(nombre);
-  await dialogo.getByLabel('Correo').fill(`e2e-${marca}@example.com`);
-  await dialogo.getByLabel('Presupuesto').fill('250000');
-  await dialogo.getByLabel('Proyecto').fill('Vista Verde');
+  await dialogo.getByLabel('Correo').fill(correo);
+  await dialogo.getByLabel('Presupuesto').fill('185000');
+  await dialogo.getByLabel('Proyecto').fill(proyecto);
   await dialogo.getByRole('button', { name: 'Crear lead' }).click();
 
   await expect(dialogo).toBeHidden();
