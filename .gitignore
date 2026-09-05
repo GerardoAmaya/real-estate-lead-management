@@ -3,7 +3,7 @@ node_modules/
 .pnp/
 .pnp.js
 
-# Variables de entorno — nunca versionar valores reales
+# Variables de entorno: nunca versionar valores reales
 .env
 .env.local
 .env.*.local
@@ -43,3 +43,6 @@ Thumbs.db
 
 # Docker
 .docker-data/
+
+# Playwright: sesion reutilizada por las pruebas E2E
+e2e/.auth/*.json

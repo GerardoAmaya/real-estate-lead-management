@@ -15,7 +15,11 @@ import { faCircleExclamation, faInbox } from '@fortawesome/free-solid-svg-icons'
         class="rounded-full p-3"
         [class]="variant === 'error' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'"
       >
-        <fa-icon [icon]="variant === 'error' ? errorIcon : emptyIcon" size="lg" aria-hidden="true" />
+        <fa-icon
+          [icon]="variant === 'error' ? errorIcon : emptyIcon"
+          size="lg"
+          aria-hidden="true"
+        />
       </span>
 
       <p class="text-sm font-medium text-slate-900">{{ title }}</p>

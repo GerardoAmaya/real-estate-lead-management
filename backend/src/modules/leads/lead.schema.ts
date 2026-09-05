@@ -15,7 +15,9 @@ export const createLeadSchema = z
     phone: z.string().trim().max(30).optional(),
     source: z.enum(LEAD_SOURCES),
     status: z.enum(LEAD_STATUSES).default('Nuevo'),
-    budget: z.number('El presupuesto debe ser numerico').positive('El presupuesto debe ser mayor que cero'),
+    budget: z
+      .number('El presupuesto debe ser numerico')
+      .positive('El presupuesto debe ser mayor que cero'),
     project: z.string().trim().min(2, 'El proyecto es obligatorio').max(120),
   })
   .strict();

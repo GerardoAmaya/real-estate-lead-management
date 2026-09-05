@@ -139,3 +139,66 @@ jobs:
       # Comprueba que la imagen de produccion compila; no la publica.
       - name: Construir la imagen del backend
         run: docker build -f backend/Dockerfile --target production -t rel-api:ci .
+
+      - name: Construir la imagen del frontend
+        run: docker build -f frontend/Dockerfile --target production -t rel-web:ci ./frontend
+
+      # El contenedor de migraciones necesita las devDependencies del backend.
+      - name: Construir la imagen de migraciones
+        run: docker build -f backend/Dockerfile --target migrator -t rel-migrate:ci .
+
+  e2e:
+    name: Pruebas E2E
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configurar Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # Solo las dependencias de la raiz: Playwright corre contra los
+      # contenedores, no contra el codigo fuente.
+      - name: Instalar dependencias
+        run: npm ci --ignore-scripts
+
+      - name: Instalar el navegador
+        run: npx playwright install --with-deps chromium
+
+      - name: Levantar el stack completo
+        run: |
+          cp .env.example .env
+          docker compose --profile full up -d --build
+
+      # El healthcheck se consulta a traves de nginx: valida de paso el proxy.
+      - name: Esperar a que la aplicacion responda
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/api/health > /dev/null; then
+              echo "Aplicacion disponible"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose --profile full logs
+          exit 1
+
+      - name: Ejecutar las pruebas
+        run: npm run test:e2e
+
+      - name: Publicar el reporte si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Bajar el stack
+        if: always()
+        run: docker compose --profile full down -v

@@ -24,14 +24,14 @@ MongoDB 7 en Docker. Los comandos para reproducirlas están incluidos.
 Los índices actuales se crean por migración versionada, nunca con `autoIndex`
 de Mongoose. Están en `backend/migrations/20260904000002-create-leads-indexes.js`:
 
-| Índice | Propósito |
-|---|---|
-| `{ status: 1, createdAt: -1 }` | Filtro por estado + orden por fecha |
-| `{ source: 1, createdAt: -1 }` | Filtro por fuente + orden por fecha |
-| `{ project: 1, createdAt: -1 }` | Filtro por proyecto + orden por fecha |
-| `{ createdAt: -1 }` | Orden por fecha sin filtro previo |
-| `{ budget: -1 }` | Orden por presupuesto sin filtro previo |
-| `{ email: 1 }` | Búsqueda por correo |
+| Índice                          | Propósito                               |
+| ------------------------------- | --------------------------------------- |
+| `{ status: 1, createdAt: -1 }`  | Filtro por estado + orden por fecha     |
+| `{ source: 1, createdAt: -1 }`  | Filtro por fuente + orden por fecha     |
+| `{ project: 1, createdAt: -1 }` | Filtro por proyecto + orden por fecha   |
+| `{ createdAt: -1 }`             | Orden por fecha sin filtro previo       |
+| `{ budget: -1 }`                | Orden por presupuesto sin filtro previo |
+| `{ email: 1 }`                  | Búsqueda por correo                     |
 
 **Los compuestos siguen el patrón ESR** (Equality, Sort, Range): primero el campo
 por el que se filtra por igualdad, después el de ordenamiento. Ese orden permite
@@ -105,7 +105,7 @@ stage: 'COLLSCAN', nReturned: 10, totalDocsExamined: 10, executionTimeMillis: 0
 ```
 
 **Ese `COLLSCAN` es correcto y no se puede evitar con índices.** Calcular un
-total, un promedio y agrupaciones sobre *toda* la colección obliga a leer todos
+total, un promedio y agrupaciones sobre _toda_ la colección obliga a leer todos
 los documentos; no hay filtro que reduzca el conjunto. Con 10 registros son 0 ms;
 con 2 millones son segundos.
 
@@ -234,7 +234,7 @@ caché y cola de lectura.
 balanceador y códigos de respuesta.
 
 **Herramienta decisiva:** `explain("executionStats")`. Es la única que responde
-*por qué* una consulta es lenta, no solo *cuánto* tarda.
+_por qué_ una consulta es lenta, no solo _cuánto_ tarda.
 
 En este proyecto ya está la instrumentación necesaria: el correlation ID, el
 `responseTime` por petición, y el `customLogLevel` que clasifica 5xx como `error`
@@ -405,7 +405,7 @@ Y una regla de caché diferenciada: los archivos con hash pueden cachearse un a�
 `index.html` **nunca**, o los usuarios seguirán cargando la versión anterior tras
 cada despliegue.
 
-**Backend: contenedores sobre ECS Fargate (sí. Lambda) no, en este caso.**
+**Backend: contenedores sobre ECS Fargate sí, Lambda no en este caso.**
 
 La API es un proceso Express de larga vida con un pool de conexiones a MongoDB.
 Ese pool es justamente lo que encaja mal con Lambda: cada invocación en frío abre
@@ -434,7 +434,7 @@ Notificaciones de nuevo lead o de cambio de estado. Es barato, se integra con IA
 sin credenciales SMTP en el código, y da métricas de entrega y rebote.
 
 **Las dos cosas que no se pueden pasar por alto:** una cuenta nueva de SES está
-en *sandbox* y solo envía a direcciones verificadas (salir requiere una solicitud
+en _sandbox_ y solo envía a direcciones verificadas (salir requiere una solicitud
 que tarda), y hay que configurar SPF, DKIM y DMARC en el DNS o los correos irán a
 spam. Ambas cosas se hacen **antes** de la migración, no el día del cambio.
 
@@ -487,16 +487,16 @@ cuentas corporativas, minimizando indisponibilidad y pérdida de datos.
 
 Nada se migra hasta que exista un inventario cerrado. Lo que documentaría:
 
-| Ámbito | Qué inventariar |
-|---|---|
-| Código | Repositorios, ramas activas, quién tiene acceso, secretos en el historial |
-| Infraestructura | Servicios en uso, dimensionamiento, coste mensual actual |
-| Base de datos | Versión, tamaño, colecciones, índices, tasa de escritura |
-| Dominio | Registrador, DNS, TTL actual, certificados y su vencimiento |
-| Correo | Proveedor, dominios verificados, registros SPF/DKIM/DMARC |
-| Variables | Todas las de entorno por servicio, marcando cuáles son secretos |
-| Integraciones | Servicios externos, webhooks entrantes, IPs en listas blancas |
-| Accesos | Quién tiene acceso a qué, con nombre y responsable |
+| Ámbito          | Qué inventariar                                                           |
+| --------------- | ------------------------------------------------------------------------- |
+| Código          | Repositorios, ramas activas, quién tiene acceso, secretos en el historial |
+| Infraestructura | Servicios en uso, dimensionamiento, coste mensual actual                  |
+| Base de datos   | Versión, tamaño, colecciones, índices, tasa de escritura                  |
+| Dominio         | Registrador, DNS, TTL actual, certificados y su vencimiento               |
+| Correo          | Proveedor, dominios verificados, registros SPF/DKIM/DMARC                 |
+| Variables       | Todas las de entorno por servicio, marcando cuáles son secretos           |
+| Integraciones   | Servicios externos, webhooks entrantes, IPs en listas blancas             |
+| Accesos         | Quién tiene acceso a qué, con nombre y responsable                        |
 
 **Preparación en paralelo:**
 
@@ -525,23 +525,23 @@ midiendo el ensayo.
 Ventana en horario de mínimo uso, comunicada con antelación.
 
 1. **Congelar escrituras** o poner la aplicación en modo solo lectura. Sin esto,
- los datos escritos durante la copia se pierden.
+   los datos escritos durante la copia se pierden.
 2. **Copia final incremental** de la base de datos. La copia completa se hizo
- antes; ahora solo viaja el delta, que es lo que acota la ventana.
+   antes; ahora solo viaja el delta, que es lo que acota la ventana.
 3. **Verificar integridad** con criterios objetivos: conteo de documentos por
- colección, y comparación de los indicadores agregados entre origen y destino.
- Si los números no cuadran exactamente, se aborta.
+   colección, y comparación de los indicadores agregados entre origen y destino.
+   Si los números no cuadran exactamente, se aborta.
 4. **Aplicar las migraciones de índices** (`npm run migrate:up`) y confirmar que
- se crearon todos. Sin índices, la aplicación arranca pero va lenta y parecerá
- un problema de la migración.
+   se crearon todos. Sin índices, la aplicación arranca pero va lenta y parecerá
+   un problema de la migración.
 5. **Desplegar backend y frontend** en la infraestructura nueva.
 6. **Validar sin cambiar el DNS**, usando el dominio interno del balanceador:
- `/api/health` en verde, login funcional, dashboard con los valores correctos,
- creación de un lead de prueba.
+   `/api/health` en verde, login funcional, dashboard con los valores correctos,
+   creación de un lead de prueba.
 7. **Cambiar el DNS.** Con TTL en 60 segundos, la propagación es cuestión de
- minutos.
+   minutos.
 8. **Monitorizar activamente** durante la primera hora: tasa de errores 5xx,
- latencia p95, conexiones a la base, logs de error.
+   latencia p95, conexiones a la base, logs de error.
 
 ### 4.3 Después: verificación y cierre
 
@@ -562,13 +562,13 @@ baja: es el seguro contra el problema que aparece a los diez días.
 
 **Criterios de aborto, decididos antes y no durante:**
 
-| Señal | Umbral |
-|---|---|
-| Errores 5xx | > 1% de las peticiones durante 5 minutos |
-| Latencia p95 | > 3 veces la línea base |
-| Pérdida de datos | Cualquier discrepancia en los conteos |
-| Autenticación | Los usuarios no pueden iniciar sesión |
-| Ventana | Se supera el tiempo previsto sin validación completa |
+| Señal            | Umbral                                               |
+| ---------------- | ---------------------------------------------------- |
+| Errores 5xx      | > 1% de las peticiones durante 5 minutos             |
+| Latencia p95     | > 3 veces la línea base                              |
+| Pérdida de datos | Cualquier discrepancia en los conteos                |
+| Autenticación    | Los usuarios no pueden iniciar sesión                |
+| Ventana          | Se supera el tiempo previsto sin validación completa |
 
 Definirlos por adelantado evita la decisión más costosa de toda migración: seguir
 adelante "porque ya llevamos mucho" cuando las señales dicen que hay que volver.
@@ -595,18 +595,18 @@ ejecuta el rollback garantiza que la comunicación llegue tarde y mal.
 
 ### 5.1 Resumen de controles
 
-| # | Control | OWASP | Estado |
-|---|---|---|---|
-| 1 | Autenticación JWT en rutas de escritura | A01 · API1 | Implementado |
-| 2 | Contraseñas con bcrypt y secretos por entorno | A02 | Implementado |
-| 3 | Validación estricta contra inyección y mass assignment | A03 · API3 | Implementado |
-| 4 | Limitación de peticiones, con umbral estricto en el login | A04 · API4 | Implementado |
-| 5 | Cabeceras de seguridad, CORS por lista blanca, límite de cuerpo | A05 | Implementado |
-| 6 | Registro seguro con redacción y correlación | A09 | Implementado |
-| 7 | Tope de tamaño de página | API4 | Implementado |
-| 8 | Contenedor sin privilegios y auditoría de dependencias | A05 · A06 | Implementado |
-| 9 | Token en cookie httpOnly con protección CSRF | A07 | Propuesto |
-| 10 | Framework fuera de soporte con CVEs conocidos | A06 | Riesgo aceptado |
+| #   | Control                                                         | OWASP      | Estado          |
+| --- | --------------------------------------------------------------- | ---------- | --------------- |
+| 1   | Autenticación JWT en rutas de escritura                         | A01 · API1 | Implementado    |
+| 2   | Contraseñas con bcrypt y secretos por entorno                   | A02        | Implementado    |
+| 3   | Validación estricta contra inyección y mass assignment          | A03 · API3 | Implementado    |
+| 4   | Limitación de peticiones, con umbral estricto en el login       | A04 · API4 | Implementado    |
+| 5   | Cabeceras de seguridad, CORS por lista blanca, límite de cuerpo | A05        | Implementado    |
+| 6   | Registro seguro con redacción y correlación                     | A09        | Implementado    |
+| 7   | Tope de tamaño de página                                        | API4       | Implementado    |
+| 8   | Contenedor sin privilegios y auditoría de dependencias          | A05 · A06  | Implementado    |
+| 9   | Token en cookie httpOnly con protección CSRF                    | A07        | Propuesto       |
+| 10  | Framework fuera de soporte con CVEs conocidos                   | A06        | Riesgo aceptado |
 
 ### 5.2 Detalle
 
@@ -712,13 +712,13 @@ actualizar a una versión mayor, lo que incumpliría el requisito.
 
 Revisando su aplicabilidad real a esta aplicación:
 
-| Aviso | ¿Aplica aquí? |
-|---|---|
-| XSS vía i18n (3 avisos) | No (la aplicación no usa i18n |
-| `HttpTransferCache` y hidratación (4 avisos) | No) son de SSR; esta es una SPA pura |
-| Fuga de token XSRF por URLs relativas de protocolo | No (`apiUrl` es absoluta en desarrollo y `/api` en producción, nunca `//host` |
-| Denegación de servicio en `formatDate` y `digitsInfo` | No) los formatos son literales fijos, no provienen del usuario |
-| Bypass de saneado en SVG y MathML | Exposición baja: requiere HTML no confiable; no se usa `innerHTML` ni `bypassSecurityTrust*` |
+| Aviso                                                 | ¿Aplica aquí?                                                                                |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| XSS vía i18n (3 avisos)                               | No (la aplicación no usa i18n                                                                |
+| `HttpTransferCache` y hidratación (4 avisos)          | No) son de SSR; esta es una SPA pura                                                         |
+| Fuga de token XSRF por URLs relativas de protocolo    | No (`apiUrl` es absoluta en desarrollo y `/api` en producción, nunca `//host`                |
+| Denegación de servicio en `formatDate` y `digitsInfo` | No) los formatos son literales fijos, no provienen del usuario                               |
+| Bypass de saneado en SVG y MathML                     | Exposición baja: requiere HTML no confiable; no se usa `innerHTML` ni `bypassSecurityTrust*` |
 
 > **Riesgo:** framework sin soporte con vulnerabilidades publicadas.
 > **Medida:** actualizar a una versión con soporte activo. Mientras la
@@ -740,24 +740,24 @@ por lo que aporta cada uno frente a lo que cuesta.
 
 #### Antes de exponerlo a usuarios reales
 
-| Control | OWASP | Por qué |
-|---|---|---|
-| Access token y refresh token con expiración deslizante | A07 | Cierre de sesión por inactividad real |
-| Limitación de peticiones con almacén compartido | A04 | El contador en memoria se multiplica por instancia |
-| Bloqueo temporal de cuenta tras varios fallos | A07 | Complementa la limitación por IP |
-| TLS obligatorio con HSTS | A02 | Impide la degradación a HTTP |
-| Rotación automática de secretos | A02 | Acota la ventana de una credencial filtrada |
-| Política de retención de datos personales | Datos | Los leads contienen nombre, correo y teléfono |
+| Control                                                | OWASP | Por qué                                            |
+| ------------------------------------------------------ | ----- | -------------------------------------------------- |
+| Access token y refresh token con expiración deslizante | A07   | Cierre de sesión por inactividad real              |
+| Limitación de peticiones con almacén compartido        | A04   | El contador en memoria se multiplica por instancia |
+| Bloqueo temporal de cuenta tras varios fallos          | A07   | Complementa la limitación por IP                   |
+| TLS obligatorio con HSTS                               | A02   | Impide la degradación a HTTP                       |
+| Rotación automática de secretos                        | A02   | Acota la ventana de una credencial filtrada        |
+| Política de retención de datos personales              | Datos | Los leads contienen nombre, correo y teléfono      |
 
 #### Al crecer el equipo o el volumen
 
-| Control | OWASP | Por qué |
-|---|---|---|
-| Roles y permisos granulares | A01 | Hoy `admin` y `agent` existen pero no se diferencian |
-| Registro de auditoría solo de anexado | A09 | Trazabilidad de quién cambió qué y cuándo |
-| Segundo factor para cuentas administrativas | A07 | La contraseña deja de ser el único obstáculo |
-| Actualización automatizada de dependencias | A06 | Evita acumular CVEs en silencio |
-| Análisis dinámico en el pipeline | A05 | Complementa el análisis estático de SonarCloud |
+| Control                                     | OWASP | Por qué                                              |
+| ------------------------------------------- | ----- | ---------------------------------------------------- |
+| Roles y permisos granulares                 | A01   | Hoy `admin` y `agent` existen pero no se diferencian |
+| Registro de auditoría solo de anexado       | A09   | Trazabilidad de quién cambió qué y cuándo            |
+| Segundo factor para cuentas administrativas | A07   | La contraseña deja de ser el único obstáculo         |
+| Actualización automatizada de dependencias  | A06   | Evita acumular CVEs en silencio                      |
+| Análisis dinámico en el pipeline            | A05   | Complementa el análisis estático de SonarCloud       |
 
 ### 5.4 Detalle de los tres más relevantes
 
@@ -820,7 +820,6 @@ suele quedar sin resolver y conviene decidirlo antes de tener backups de años.
 
 **Cifrado en reposo** con claves gestionadas, y **registro de acceso** a datos
 personales para saber quién consultó qué.
-
 
 ---
 
@@ -892,14 +891,14 @@ extensible sin tocar el esquema de validación.
 Pocas alarmas y accionables. Una alarma que salta a diario y nadie atiende es
 peor que no tenerla.
 
-| Alarma | Umbral | Por qué |
-|---|---|---|
-| Tasa de errores 5xx | > 1% en 5 minutos | Fallo real del servidor, distinto de errores de validación del cliente |
-| Latencia p95 de la API | > 2 segundos en 10 minutos | Detecta la degradación antes que los usuarios |
-| `/api/health` degradado | 2 comprobaciones seguidas | La base de datos dejó de responder |
-| Conexiones a MongoDB | > 80% del límite | Anticipa el agotamiento del pool |
-| Fallos de login | Pico anómalo en 15 minutos | Posible ataque de credenciales |
-| Backup no generado | Ausencia en 24 horas | El fallo silencioso más caro que existe |
+| Alarma                  | Umbral                     | Por qué                                                                |
+| ----------------------- | -------------------------- | ---------------------------------------------------------------------- |
+| Tasa de errores 5xx     | > 1% en 5 minutos          | Fallo real del servidor, distinto de errores de validación del cliente |
+| Latencia p95 de la API  | > 2 segundos en 10 minutos | Detecta la degradación antes que los usuarios                          |
+| `/api/health` degradado | 2 comprobaciones seguidas  | La base de datos dejó de responder                                     |
+| Conexiones a MongoDB    | > 80% del límite           | Anticipa el agotamiento del pool                                       |
+| Fallos de login         | Pico anómalo en 15 minutos | Posible ataque de credenciales                                         |
+| Backup no generado      | Ausencia en 24 horas       | El fallo silencioso más caro que existe                                |
 
 **Además de las alarmas:**
 

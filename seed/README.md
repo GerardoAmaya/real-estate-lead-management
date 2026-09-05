@@ -20,12 +20,12 @@ el seed no puede insertar datos que los endpoints rechazarian.
 
 Con estos datos, `GET /api/dashboard/summary` debe devolver:
 
-| Indicador | Valor |
-|---|---|
-| totalLeads | 10 |
-| averageBudget | 174000 |
-| reservedLeads | 2 |
-| conversionRate | 20 |
-| byStatus | Nuevo 2, Contactado 2, Calificado 3, Reservado 2, Descartado 1 |
-| bySource | Facebook 3, Instagram 3, Website 2, Referido 2 |
-| byProject | Residencial Altavista 4, Torres del Valle 3, Vista Verde 3 |
+| Indicador      | Valor                                                          |
+| -------------- | -------------------------------------------------------------- |
+| totalLeads     | 10                                                             |
+| averageBudget  | 174000                                                         |
+| reservedLeads  | 2                                                              |
+| conversionRate | 20                                                             |
+| byStatus       | Nuevo 2, Contactado 2, Calificado 3, Reservado 2, Descartado 1 |
+| bySource       | Facebook 3, Instagram 3, Website 2, Referido 2                 |
+| byProject      | Residencial Altavista 4, Torres del Valle 3, Vista Verde 3     |

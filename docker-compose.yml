@@ -1,6 +1,6 @@
 # Perfiles de uso:
 #   docker compose up -d mongo            -> solo la base de datos (desarrollo)
-#   docker compose --profile full up      -> stack completo (api + web + mongo)
+#   docker compose --profile full up      -> stack completo (mongo + migrate + api + web)
 
 services:
   mongo:
@@ -21,6 +21,28 @@ services:
     networks:
       - rel-network
 
+  # Contenedor de un solo disparo: crea indices y validators, carga el Anexo A
+  # y termina. La API no arranca hasta que este sale con codigo 0.
+  migrate:
+    profiles: [full]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: migrator
+    container_name: rel-migrate
+    restart: 'no'
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongo:27017/${MONGODB_DB_NAME:-real_estate_leads}
+      SEED_DATA_DIR: /app/seed/data
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - rel-network
+
   api:
     profiles: [full]
     build:
@@ -38,11 +60,15 @@ services:
       MONGODB_URI: mongodb://mongo:27017/${MONGODB_DB_NAME:-real_estate_leads}
       # La ruta de los datos cambia dentro de la imagen
       SEED_DATA_DIR: /app/seed/data
+      # nginx sirve la SPA y hace proxy de /api: el navegador ve un solo origen
+      CORS_ORIGINS: http://localhost:${WEB_PORT:-8080}
     ports:
-      - '3000:3000'
+      - '${API_PORT:-3000}:3000'
     depends_on:
       mongo:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - rel-network
 
@@ -51,12 +77,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: production
     container_name: rel-web
     restart: unless-stopped
     ports:
-      - '8080:80'
+      - '${WEB_PORT:-8080}:80'
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - rel-network
 

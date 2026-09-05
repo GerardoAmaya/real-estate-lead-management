@@ -51,7 +51,8 @@ export function createApp(): Express {
       autoLogging: { ignore: (req) => req.url === '/api/health' },
       // Una linea por peticion en lugar del volcado completo de req y res.
       // originalUrl conserva la ruta completa: Express muta req.url al montar routers.
-      customSuccessMessage: (req, res) => `${req.method ?? ''} ${requestPath(req)} ${res.statusCode}`,
+      customSuccessMessage: (req, res) =>
+        `${req.method ?? ''} ${requestPath(req)} ${res.statusCode}`,
       customErrorMessage: (req, res, error) =>
         `${req.method ?? ''} ${requestPath(req)} ${res.statusCode} - ${error.message}`,
       customLogLevel: (_req, res, error) => {

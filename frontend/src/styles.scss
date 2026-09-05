@@ -48,3 +48,25 @@
     @apply mt-1 text-xs text-red-600;
   }
 }
+
+// Entrada de los avisos. Se respeta la preferencia de movimiento reducido.
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.toast-enter {
+  animation: toast-in 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter {
+    animation: none;
+  }
+}

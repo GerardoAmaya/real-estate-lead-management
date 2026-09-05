@@ -12,7 +12,7 @@ import type { PaginationMeta } from '../../../core/models/lead.model';
   template: `
     <nav
       class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3"
-      aria-label="Paginacion"
+      aria-label="Paginación"
     >
       <p class="text-sm text-slate-600">
         Mostrando <span class="font-medium">{{ from }}</span> a
@@ -32,7 +32,7 @@ import type { PaginationMeta } from '../../../core/models/lead.model';
         </button>
 
         <span class="text-sm text-slate-600">
-          Pagina {{ meta.page }} de {{ meta.totalPages || 1 }}
+          Página {{ meta.page }} de {{ meta.totalPages || 1 }}
         </span>
 
         <button

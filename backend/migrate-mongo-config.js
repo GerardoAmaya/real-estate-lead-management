@@ -6,7 +6,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env'), quiet: true
 module.exports = {
   mongodb: {
     url: process.env.MONGODB_URI || 'mongodb://localhost:27017/real_estate_leads',
-    options: { },
+    options: {},
   },
   migrationsDir: 'migrations',
   changelogCollectionName: 'changelog',

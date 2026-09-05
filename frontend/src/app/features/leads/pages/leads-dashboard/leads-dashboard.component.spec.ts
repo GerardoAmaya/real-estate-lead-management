@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { Dialog } from '@angular/cdk/dialog';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
+import { Router } from '@angular/router';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { authInterceptor } from '../../../../core/interceptors/auth.interceptor';
 import { errorInterceptor } from '../../../../core/interceptors/error.interceptor';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -110,8 +112,10 @@ describe('LeadsDashboardComponent', () => {
     fixture.detectChanges();
     httpMock
       .expectOne((r) => r.url === leadsUrl)
-      .flush({ error: { code: 'INTERNAL_ERROR', message: 'Fallo el servidor', timestamp: '' } },
-        { status: 500, statusText: 'Server Error' });
+      .flush(
+        { error: { code: 'INTERNAL_ERROR', message: 'Fallo el servidor', timestamp: '' } },
+        { status: 500, statusText: 'Server Error' },
+      );
     httpMock.expectOne(summaryUrl).flush(SUMMARY);
     fixture.detectChanges();
 
@@ -262,6 +266,8 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
   let fixture: ComponentFixture<LeadsDashboardComponent>;
   let httpMock: HttpTestingController;
   let dialog: jasmine.SpyObj<Dialog>;
+  let router: jasmine.SpyObj<Router>;
+  let toasts: ToastService;
 
   const leadsUrl = `${environment.apiUrl}/leads`;
   const summaryUrl = `${environment.apiUrl}/dashboard/summary`;
@@ -276,10 +282,11 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
 
   beforeEach(async () => {
     localStorage.clear();
-    // Con token en el almacenamiento no se abre el dialogo de login.
+    // El guard exige sesion para llegar a esta pantalla: se simula con el token.
     localStorage.setItem('rel.accessToken', 'token-de-prueba');
 
     dialog = jasmine.createSpyObj<Dialog>('Dialog', ['open']);
+    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [LeadsDashboardComponent, NoopAnimationsModule],
@@ -290,6 +297,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
         provideHttpClientTesting(),
         // El anunciador real programa temporizadores que fakeAsync no perdona.
         { provide: LiveAnnouncer, useValue: { announce: () => Promise.resolve() } },
+        { provide: Router, useValue: router },
       ],
     })
       // DialogModule aporta Dialog en el inyector del componente, que tiene
@@ -301,6 +309,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
 
     fixture = TestBed.createComponent(LeadsDashboardComponent);
     httpMock = TestBed.inject(HttpTestingController);
+    toasts = TestBed.inject(ToastService);
 
     fixture.detectChanges();
     httpMock.expectOne((r) => r.url === leadsUrl).flush(PAGE);
@@ -310,6 +319,9 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
 
   afterEach(() => {
     localStorage.clear();
+    // Los avisos son un servicio de raiz: sin limpiarlos, una prueba veria los
+    // de la anterior.
+    toasts.toasts().forEach((toast) => toasts.dismiss(toast.id));
   });
 
   function drainPendingRequests(): void {
@@ -320,7 +332,7 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
   it('crea el lead y recarga listado e indicadores', fakeAsync(() => {
     dialog.open.and.returnValue({ closed: of(NEW_LEAD) } as ReturnType<Dialog['open']>);
 
-    void fixture.componentInstance['onCreateLead']();
+    fixture.componentInstance['onCreateLead']();
     tick();
 
     const post = httpMock.expectOne((r) => r.url === leadsUrl && r.method === 'POST');
@@ -332,22 +344,23 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
     // La recarga vuelve a pedir listado y resumen.
     expect(httpMock.match((r) => r.url === summaryUrl)).toHaveSize(1);
     drainPendingRequests();
+    flush();
   }));
 
   it('no envia nada si se cancela el dialogo de creacion', fakeAsync(() => {
     dialog.open.and.returnValue({ closed: of(undefined) } as ReturnType<Dialog['open']>);
 
-    void fixture.componentInstance['onCreateLead']();
+    fixture.componentInstance['onCreateLead']();
     tick();
 
     httpMock.expectNone((r) => r.method === 'POST');
-    expect(fixture.componentInstance['actionError']()).toBeNull();
+    expect(toasts.toasts()).toHaveSize(0);
   }));
 
   it('muestra el error devuelto por la API si la creacion falla', fakeAsync(() => {
     dialog.open.and.returnValue({ closed: of(NEW_LEAD) } as ReturnType<Dialog['open']>);
 
-    void fixture.componentInstance['onCreateLead']();
+    fixture.componentInstance['onCreateLead']();
     tick();
 
     httpMock
@@ -358,12 +371,14 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
       );
     fixture.detectChanges();
 
-    expect(fixture.componentInstance['actionError']()).toBe('Datos invalidos');
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Datos invalidos');
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({ variant: 'error', message: 'Datos invalidos' }),
+    ]);
+    flush();
   }));
 
   it('actualiza el estado y limpia el indicador de fila en curso', fakeAsync(() => {
-    void fixture.componentInstance['onStatusChange']({ lead: LEAD, status: 'Reservado' });
+    fixture.componentInstance['onStatusChange']({ lead: LEAD, status: 'Reservado' });
     tick();
 
     const patch = httpMock.expectOne((r) => r.method === 'PATCH');
@@ -377,11 +392,18 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance['updatingId']()).toBeNull();
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({
+        variant: 'success',
+        message: jasmine.stringContaining('Reservado'),
+      }),
+    ]);
     drainPendingRequests();
+    flush();
   }));
 
   it('recarga y muestra el error si la actualizacion de estado falla', fakeAsync(() => {
-    void fixture.componentInstance['onStatusChange']({ lead: LEAD, status: 'Reservado' });
+    fixture.componentInstance['onStatusChange']({ lead: LEAD, status: 'Reservado' });
     tick();
 
     httpMock
@@ -392,16 +414,20 @@ describe('LeadsDashboardComponent · acciones con dialogo', () => {
       );
     fixture.detectChanges();
 
-    expect(fixture.componentInstance['actionError']()).toBe('No existe el lead');
+    expect(toasts.toasts()).toEqual([
+      jasmine.objectContaining({ variant: 'error', message: 'No existe el lead' }),
+    ]);
     // La fila deja de estar bloqueada aunque haya fallado.
     expect(fixture.componentInstance['updatingId']()).toBeNull();
     drainPendingRequests();
+    flush();
   }));
 
-  it('cierra la sesion y deja de exponer el token', () => {
+  it('cierra la sesion, borra el token y vuelve al acceso', () => {
     fixture.componentInstance['onLogout']();
 
     expect(fixture.componentInstance['auth'].isAuthenticated).toBe(false);
     expect(localStorage.getItem('rel.accessToken')).toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 });

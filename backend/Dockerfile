@@ -41,3 +41,14 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/server.js"]
+
+# --- Etapa 3: migraciones y seed ---
+# Reutiliza el builder porque migrate-mongo es una devDependency: la imagen de
+# produccion se mantiene sin herramientas que no necesita en tiempo de ejecucion.
+FROM builder AS migrator
+
+COPY backend/migrations ./migrations
+COPY backend/migrate-mongo-config.js ./
+COPY seed ./seed
+
+CMD ["sh", "-c", "npx migrate-mongo up -f migrate-mongo-config.js && node dist/scripts/seed.js"]

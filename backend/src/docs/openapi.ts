@@ -132,12 +132,16 @@ export const openApiDocument = {
           'mismo error, para no revelar que correos estan registrados.',
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginRequest' } } },
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/LoginRequest' } },
+          },
         },
         responses: {
           200: {
             description: 'Credenciales validas',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginResponse' } } },
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/LoginResponse' } },
+            },
           },
           400: errorResponse(
             'Datos de entrada invalidos',
@@ -337,7 +341,9 @@ export const openApiDocument = {
         requestBody: {
           required: true,
           content: {
-            'application/json': { schema: { $ref: '#/components/schemas/UpdateLeadStatusRequest' } },
+            'application/json': {
+              schema: { $ref: '#/components/schemas/UpdateLeadStatusRequest' },
+            },
           },
         },
         responses: {

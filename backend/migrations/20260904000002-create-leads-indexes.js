@@ -13,9 +13,9 @@ const INDEXES = [
 
 module.exports = {
   async up(db) {
-    await db.collection('leads').createIndexes(
-      INDEXES.map((index) => ({ ...index, background: true })),
-    );
+    await db
+      .collection('leads')
+      .createIndexes(INDEXES.map((index) => ({ ...index, background: true })));
   },
 
   async down(db) {

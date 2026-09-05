@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CommonModule } from '@angular/common';
 import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowRightFromBracket,
+  faCircleUser,
   faChartLine,
   faCoins,
   faPlus,
@@ -26,6 +28,7 @@ import {
 import { LeadService } from '../../../../core/services/lead.service';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import {
   DEFAULT_LEAD_QUERY,
   type CreateLeadPayload,
@@ -43,7 +46,6 @@ import { LeadFiltersComponent } from '../../components/lead-filters.component';
 import { LeadTableComponent } from '../../components/lead-table.component';
 import { LeadPaginatorComponent } from '../../components/lead-paginator.component';
 import { LeadFormDialogComponent } from '../../components/lead-form-dialog.component';
-import { LoginDialogComponent } from '../../components/login-dialog.component';
 import { failure, loading, success, type ViewState } from './view-state';
 
 @Component({
@@ -69,6 +71,8 @@ export class LeadsDashboardComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly dialog = inject(Dialog);
   private readonly announcer = inject(LiveAnnouncer);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   protected readonly auth = inject(AuthService);
 
   protected readonly icons = {
@@ -77,6 +81,7 @@ export class LeadsDashboardComponent {
     conversion: faChartLine,
     reserved: faBookmark,
     add: faPlus,
+    user: faCircleUser,
     logout: faArrowRightFromBracket,
   };
 
@@ -98,7 +103,6 @@ export class LeadsDashboardComponent {
     };
   });
   protected readonly updatingId = signal<string | null>(null);
-  protected readonly actionError = signal<string | null>(null);
 
   // distinctUntilChanged evita repetir la misma peticion cuando el usuario
   // vuelve a elegir el valor que ya estaba seleccionado.
@@ -169,42 +173,33 @@ export class LeadsDashboardComponent {
     this.patchQuery({ sortBy: field, sortOrder: nextOrder, page: 1 });
   }
 
-  protected async onCreateLead(): Promise<void> {
-    if (!(await this.ensureAuthenticated())) return;
-
+  protected onCreateLead(): void {
     this.dialog
       .open<CreateLeadPayload | undefined>(LeadFormDialogComponent)
       .closed.subscribe((payload) => {
         if (!payload) return;
 
-        this.actionError.set(null);
         this.leadService.create(payload).subscribe({
           next: (lead) => {
-            void this.announcer.announce(`Lead ${lead.name} creado.`);
+            this.notify('success', `Lead ${lead.name} creado.`);
             this.reload.next();
           },
-          error: (error: Error) => this.actionError.set(error.message),
+          error: (error: Error) => this.notify('error', error.message),
         });
       });
   }
 
-  protected async onStatusChange({ lead, status }: { lead: Lead; status: LeadStatus }): Promise<void> {
-    if (!(await this.ensureAuthenticated())) {
-      this.reload.next();
-      return;
-    }
-
-    this.actionError.set(null);
+  protected onStatusChange({ lead, status }: { lead: Lead; status: LeadStatus }): void {
     this.updatingId.set(lead.id);
 
     this.leadService.updateStatus(lead.id, status).subscribe({
       next: () => {
-        void this.announcer.announce(`Estado de ${lead.name} actualizado a ${status}.`);
+        this.notify('success', `Estado de ${lead.name} actualizado a ${status}.`);
         this.updatingId.set(null);
         this.reload.next();
       },
       error: (error: Error) => {
-        this.actionError.set(error.message);
+        this.notify('error', error.message);
         this.updatingId.set(null);
         this.reload.next();
       },
@@ -213,20 +208,18 @@ export class LeadsDashboardComponent {
 
   protected onLogout(): void {
     this.auth.logout();
-    void this.announcer.announce('Sesion cerrada.');
+    void this.announcer.announce('Sesión cerrada.');
+    void this.router.navigate(['/login']);
   }
 
   protected onRetry(): void {
     this.reload.next();
   }
 
-  private ensureAuthenticated(): Promise<boolean> {
-    if (this.auth.isAuthenticated) return Promise.resolve(true);
-
-    return new Promise((resolve) => {
-      this.dialog
-        .open<boolean>(LoginDialogComponent)
-        .closed.subscribe((result) => resolve(result === true));
-    });
+  // Un solo lugar para el resultado de una accion: aviso visible y anuncio
+  // para lectores de pantalla, que de otro modo no se enterarian del cambio.
+  private notify(variant: 'success' | 'error', message: string): void {
+    this.toast[variant](message);
+    void this.announcer.announce(message);
   }
 }
