@@ -20,6 +20,8 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: './e2e',
+  // Las capturas del README se generan aparte, con "npm run screenshots".
+  testIgnore: '**/screenshots.spec.ts',
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,

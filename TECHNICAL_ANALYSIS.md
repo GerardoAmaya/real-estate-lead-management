@@ -405,7 +405,7 @@ Y una regla de caché diferenciada: los archivos con hash pueden cachearse un a�
 `index.html` **nunca**, o los usuarios seguirán cargando la versión anterior tras
 cada despliegue.
 
-**Backend: contenedores sobre ECS Fargate (sí. Lambda) no, en este caso.**
+**Backend: contenedores sobre ECS Fargate sí, Lambda no en este caso.**
 
 La API es un proceso Express de larga vida con un pool de conexiones a MongoDB.
 Ese pool es justamente lo que encaja mal con Lambda: cada invocación en frío abre

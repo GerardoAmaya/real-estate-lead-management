@@ -1,15 +1,34 @@
+<div align="center">
+
 # Real Estate Lead Management
+
+Módulo de seguimiento de leads inmobiliarios: listado con filtros y paginación,
+cambio de estado, alta de leads y un dashboard de métricas resuelto en una sola
+consulta de agregación.
 
 [![CI](https://github.com/GerardoAmaya/real-estate-lead-management/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoAmaya/real-estate-lead-management/actions/workflows/ci.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=GerardoAmaya_real-estate-lead-management&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=GerardoAmaya_real-estate-lead-management)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=GerardoAmaya_real-estate-lead-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=GerardoAmaya_real-estate-lead-management)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=GerardoAmaya_real-estate-lead-management&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=GerardoAmaya_real-estate-lead-management)
 
-Módulo de seguimiento de leads inmobiliarios: listado con filtros y paginación,
-cambio de estado, alta de leads y un dashboard de métricas resuelto en una sola
-consulta de agregación.
+![Angular](https://img.shields.io/badge/Angular-16-DD0031?logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33?logo=playwright&logoColor=white)
 
-**Stack:** Angular 16 · Node.js 20 + Express 5 + TypeScript · MongoDB 7 + Mongoose · Docker
+<img src="docs/screenshots/dashboard.png" alt="Dashboard de seguimiento de leads" width="880">
+
+|                       Acceso                       |                      Alta de lead                       |
+| :------------------------------------------------: | :-----------------------------------------------------: |
+| <img src="docs/screenshots/login.png" width="430"> | <img src="docs/screenshots/nuevo-lead.png" width="430"> |
+
+<sub>Las capturas se generan con <code>npm run screenshots</code>, que recorre la
+aplicación real con Playwright sobre una base recién sembrada.</sub>
+
+</div>
 
 El análisis escrito que acompaña a la prueba (modelo de datos, diagnóstico de
 incidente, arquitectura en AWS, plan de migración y seguridad) está en
@@ -24,11 +43,12 @@ incidente, arquitectura en AWS, plan de migración y seguridad) está en
 5. [API](#api)
 6. [Estructura del proyecto](#estructura-del-proyecto)
 7. [Decisiones técnicas](#decisiones-técnicas)
-8. [Pruebas](#pruebas)
-9. [Calidad y CI](#calidad-y-ci)
-10. [Seguridad](#seguridad)
-11. [Limitaciones conocidas](#limitaciones-conocidas)
-12. [Uso de inteligencia artificial](#uso-de-inteligencia-artificial)
+8. [Cómo crecería el módulo](#cómo-crecería-el-módulo)
+9. [Pruebas](#pruebas)
+10. [Calidad y CI](#calidad-y-ci)
+11. [Seguridad](#seguridad)
+12. [Limitaciones conocidas](#limitaciones-conocidas)
+13. [Uso de inteligencia artificial](#uso-de-inteligencia-artificial)
 
 ## Requisitos
 
@@ -169,7 +189,7 @@ inconsistencia entre el contrato y el código rompe el pipeline.
 | `PATCH` | `/leads/:id/status`  | Sí   | Cambio de estado                            |
 | `GET`   | `/dashboard/summary` | No   | Métricas agregadas                          |
 
-Parámetros de `GET /leads`:
+Parámetros de `GET /leads`, todos opcionales:
 
 | Parámetro   | Valores                                                        | Por defecto |
 | ----------- | -------------------------------------------------------------- | ----------- |
@@ -294,6 +314,42 @@ avisa al compilar. Mongoose 9 y ESLint 10 exigen Node 20. Se eligió Node 20 y s
 verificó que `ng build` y `ng test` pasan; el aviso es informativo. La
 alternativa era degradar Mongoose, que era peor.
 
+## Cómo crecería el módulo
+
+La estructura ya está pensada para lo que viene, y cada tipo de crecimiento
+tiene un lugar previsto.
+
+**Más pantallas.** `features/` agrupa por dominio, no por tipo de archivo. Un
+detalle de lead o una vista de proyectos sería una carpeta hermana de `leads/`,
+con su propia ruta cargada de forma diferida, sin tocar lo existente. Hoy el
+listado y el acceso ya son dos chunks separados: una pantalla nueva no engorda
+el paquete inicial.
+
+**Más lógica en la pantalla actual.** Aquí está el límite conocido:
+`LeadsDashboardComponent` mantiene la consulta, orquesta los diálogos y compone
+los observables. Con edición de leads, exportación o filtros guardados sería el
+archivo que primero se vuelve difícil de seguir. La salida es un `LeadsStore`
+con el estado y sus transiciones, dejando al componente como presentación
+delgada y permitiendo probar la lógica sin montar la vista. Está anotado como lo
+primero a refactorizar en la sección 6.2 del análisis técnico.
+
+**Más endpoints.** En el backend cada módulo es una carpeta con rutas,
+controlador, servicio, esquema y modelo. Agregar `projects` o `users` es
+replicar esa forma y montarlo en `routes/index.ts`. Las constantes del dominio
+viven en un solo archivo por módulo y de ahí salen el modelo, la validación con
+Zod, los tipos y los enums del documento OpenAPI, así que un estado o una fuente
+nueva se agrega en un lugar y se propaga.
+
+**Más usuarios y permisos.** El modelo ya distingue `admin` y `agent`, aunque
+hoy no se diferencien. El paso siguiente es un middleware de autorización por
+rol junto al de autenticación, y un guard de Angular equivalente, sin cambiar la
+forma de las rutas.
+
+**Más volumen.** El listado ya pagina en el servidor y los índices siguen el
+patrón ESR. El punto que no escala es el agregado del dashboard, y su solución
+(una vista materializada mantenida por un job) está descrita en la sección 1.3
+del análisis técnico.
+
 ## Pruebas
 
 ### Unitarias e integración
@@ -359,8 +415,16 @@ modelo, para no tener dos mecanismos que aparentan hacer lo mismo.
 
 Las pruebas usan nombres únicos para los datos que crean y no dependen del total
 de leads, de modo que la suite se puede correr varias veces sobre la misma base
-sin resultados intermitentes. Para volver al estado inicial, `npm run
-docker:reset` y levantar de nuevo.
+sin resultados intermitentes.
+
+> **Después de correr la suite, la base queda con los leads que crearon las
+> pruebas**, así que el dashboard ya no muestra los valores de control del Anexo
+> A. Para volver al estado inicial:
+>
+> ```bash
+> npm run docker:reset
+> docker compose --profile full up -d
+> ```
 
 ## Calidad y CI
 
@@ -427,4 +491,3 @@ endpoint de reinicio disponible solo fuera de producción.
 ## Uso de inteligencia artificial
 
 Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de seguridad y revisión de redacción. En todos los casos se verificó manualmente la salida y se corrigieron errores de interpretación, y se hicieron varias iteraciones hasta que la salida fue correcta y completa. No se confió en la salida sin revisión humana.
-

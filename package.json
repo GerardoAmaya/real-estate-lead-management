@@ -32,6 +32,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "e2e:install": "playwright install --with-deps chromium",
+    "screenshots": "playwright test e2e/screenshots.spec.ts --project=chromium --config=playwright.screenshots.config.ts",
     "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
     "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,scss}\"",
