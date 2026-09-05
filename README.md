@@ -492,8 +492,13 @@ Se usó Claude para refuerzo en pruebas automatizadas, refuerzo de controles de 
 
 ## Autor
 
+<div align="center">
+
 **Gerardo Alberto Amaya**<br>
 Full Stack Engineer
 
-[gerardoamayasv2000@gmail.com](mailto:gerardoamayasv2000@gmail.com) ·
-[linkedin.com/in/gerardoalbertoamaya](https://www.linkedin.com/in/gerardoalbertoamaya/)
+[![Correo](https://img.shields.io/badge/gerardoamayasv2000%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:gerardoamayasv2000@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gerardoalbertoamaya/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GerardoAmaya)
+
+</div>

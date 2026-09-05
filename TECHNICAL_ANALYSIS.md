@@ -328,9 +328,9 @@ flowchart LR
 
     subgraph Borde["Borde"]
         direction TB
-        R53["Route 53<br/><small>DNS y certificado ACM</small>"]
-        CF["CloudFront<br/><small>CDN, TLS y WAF</small>"]
-        S3["S3<br/><small>SPA Angular</small>"]
+        R53["Route 53<br/>DNS y ACM"]
+        CF["CloudFront<br/>CDN, TLS y WAF"]
+        S3["S3<br/>SPA Angular"]
     end
 
     subgraph VPC["VPC"]
@@ -338,8 +338,8 @@ flowchart LR
         ALB["Application<br/>Load Balancer"]
         subgraph Privada["Subredes privadas"]
             direction TB
-            API["API Express<br/><small>ECS Fargate, 2 tareas</small>"]
-            DB[("MongoDB<br/><small>Atlas</small>")]
+            API["API Express<br/>ECS Fargate"]
+            DB[("MongoDB Atlas")]
         end
     end
 
@@ -348,7 +348,7 @@ flowchart LR
         SM["Secrets Manager"]
         SES["SES"]
         CW["CloudWatch"]
-        BK[("S3<br/><small>backups</small>")]
+        BK[("S3 backups")]
     end
 
     Usuario ==> R53
@@ -394,7 +394,9 @@ es exactamente lo que hace `environment.production.ts` con `apiUrl: '/api'`.
 
 La salida de `ng build` son archivos estáticos con hash en el nombre. Servirlos
 desde un contenedor sería pagar cómputo por entregar ficheros. S3 cuesta
-céntimos, CloudFront los acerca al usuario y aporta TLS gratuito con ACM.
+céntimos, CloudFront los acerca al usuario y aporta TLS gratuito con ACM, y
+permite asociar WAF en el borde para filtrar tráfico antes de que llegue a la
+aplicación.
 
 El detalle que hay que resolver: una SPA con enrutado por historial necesita que
 cualquier ruta desconocida devuelva `index.html`. En CloudFront se configura con
@@ -416,8 +418,9 @@ modelo.
 
 **Fargate** ejecuta la misma imagen Docker que ya existe en el repositorio, sin
 servidores que administrar, con escalado por métricas y despliegues sin
-interrupción. El `Dockerfile` multi-etapa con usuario no-root ya está listo para
-esto.
+interrupción. Arrancaría con dos tareas en zonas de disponibilidad distintas,
+que es el mínimo para sobrevivir a la caída de una zona, y escalaría por uso de
+CPU. El `Dockerfile` multi-etapa con usuario no-root ya está listo para esto.
 
 **Elastic Beanstalk** funcionaría y es más sencillo de arrancar, pero abstrae la
 infraestructura de un modo que complica los ajustes finos, y su modelo de
